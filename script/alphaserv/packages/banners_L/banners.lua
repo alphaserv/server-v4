@@ -18,6 +18,11 @@ banner_obj = class.new(nil, {
 			:format(id)
 			:send(players.groups.all(), false)
 	end,
+	
+	save = function(self)
+		--push to database
+	
+	end,
 })
 
 banners = {}
@@ -25,10 +30,11 @@ show_interval = 10000
 
 function add_banner(banner_obj)
 	banners[#banners+1] = banner_obj
+	return banner_obj
 end
 
 function create_banner(name, default_message, msg_type)
-	add_banner(banner_obj(name, default_message, msg_type))
+	return add_banner(banner_obj(name, default_message, msg_type))
 end
 
 function update()
@@ -55,13 +61,19 @@ function start_auto_banner()
 	if not auto_banner then
 		auto_banner = true
 		
+		print("starting auto banner")
+		
 		server.interval(show_interval, function()
 			if not auto_banner then
+				print("stopping auto banner ...")
 				return -1
 			end
 			
+			print("sending autobanner message")
 			send_next_banner()
 		end)
+	else
+		print("already started!")
 	end
 end
 

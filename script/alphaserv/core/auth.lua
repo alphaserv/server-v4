@@ -40,7 +40,7 @@ function alpha.auth.clean_access()
 	end
 	for sid, priv in pairs(alpha.auth.loggedin) do
 		if not sessionids[sid] then
-			alpha.auth.loggedin = nil
+			alpha.auth.loggedin[sid] = nil
 		end
 	end
 	lastclean = players.all()
@@ -58,7 +58,7 @@ end
 
 function alpha.auth.get_access(cn)
 	alpha.auth.clean_access()
-	return 	alpha.auth.loggedin[server.player_sessionid(cn)]
+	return alpha.auth.loggedin[server.player_sessionid(cn)]
 end
 
 function alpha.auth.has_access(cn, number)
@@ -75,8 +75,9 @@ function alpha.auth.logout(cn)
 end
 
 function alpha.auth.success(cn, privilege)
-	server.player_message(cn, "u recieved privilege")
 	alpha.auth.set_access(cn, privilege)
+	server.player_msg(cn, "u recieved privilege")
+	alpha.auth.unlock_spec(cn)
 end
 
 --###################
@@ -120,12 +121,15 @@ local function event(name, ...)
 			local a, b = alpha.auth.plugins[i][name](alpha.auth.plugins[i], unpack(arg))
 			if b and b == "FORCE" then
 				returning = a
-			elseif a and a > (returning or -1000000000) then
+			elseif type(a) == "number" and a > (returning or -1000000000) then
+				returning = a
+			elseif returning == nil then
 				returning = a
 			end
 		end
 	end
-	return a
+	
+	return returning
 end
 
 
@@ -167,7 +171,7 @@ end)
 --TODO: cleanup (= flush cache)
 
 --refresh every 10 minutes
-server.interval(10*60000, function() event("cleanup") end)
+--server.interval(10*60000, function() event("cleanup") end)
 
 alpha.auth.locked = {}
 
@@ -184,6 +188,8 @@ end
 
 function alpha.auth.unlock_spec(cn)
 	alpha.auth.locked[server.player_ip(cn)..server.player_name(cn)] = false
+	
+	--TODO: unspec
 end
 
 function alpha.auth.fail(...)
@@ -196,7 +202,7 @@ server.event_handler("disconnect", function(cn)
 	local name = server.player_name(cn)
 	if alpha.auth.locked[server.player_ip(cn)..server.player_name(cn)] then
 		for i, cn_ in pairs(players.except({cn}, players.all())) do
-			if cn ~= _cn and server.player_name(cn) == name and server.player_names(cn) == ip then
+			if cn ~= _cn and server.player_name(cn) == name and server.player_ip(cn) == ip then
 				return --HACK attempt ?, or not :)
 			end
 		end
@@ -207,8 +213,9 @@ end)
 local function check (cn)
 	local name = server.player_name(cn)
 	if event("clanreserved", name) or event("namereserved", name) then
+		server.spec(cn)
 		alpha.auth.lock_spec(cn)
-		alpha.auth.fail("reservedname")
+		server.player_msg(cn, "reservedname :O FAKER!!!")
 	end
 end
 server.event_handler("maploaded", check)

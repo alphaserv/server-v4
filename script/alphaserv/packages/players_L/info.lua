@@ -1,11 +1,11 @@
 
 return {
-	name = "Message system",
+	name = "Player groups",
 	dependics = {
 		name = "database"
 	},
 	load = {
-		"messages.lua"
+		"groups.lua"
 	}
 }
 	

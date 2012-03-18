@@ -15,11 +15,13 @@ alpha.auth.plugins.dbauth = {
 	end,
 	
 	_getname = function(obj, name)
+		print("name: ", tostring(obj.usercache[name]))
+	
 		local namerow
 		if not alpha.auth.usecaching or not obj.namecache[name] then
-			namerow = alpha.db:query("SELECT id, name, user_id FROM  `names` WHERE  `name` = ?;", name):fetch()
+			namerow = alpha.db:query("SELECT id, name, user_id FROM names WHERE name = ?;", name):fetch()
 			
-			if not namerow or not namerow[1] or not res[1]['user_id'] then
+			if not namerow or not namerow[1] or not namerow[1]['user_id'] then
 				return false--no name found in db
 			else
 				obj.namecache[name] = namerow[1]
@@ -35,41 +37,47 @@ alpha.auth.plugins.dbauth = {
 		
 		local name = server.player_name(cn)
 		
-		local namerow = obj:_getname(name)
+		local exists, namerow = obj:_getname(name)
 		
 		local userrow
 		if not alpha.auth.usecaching or not obj.usercache[name] then
-			userrow = alpha.db:query("SELECT `name`, `email`, `pass`, `priv` FROM `users` WHERE  `id` = ?;", user_id):fetch()[1]
+			userrow = alpha.db:query("SELECT `name`, `email`, `pass`, `priv` FROM `users` WHERE  `id` = ?;", namerow.user_id):fetch()
 			
-			if not userrow or not userrow[1] or not userrow[1]['pass'] then
+			if not userrow or not userrow[1] then
 				server.sleep(1, function() error('matching user not found') end)
 				return false
 			else
 				obj.usercache[name] = userrow[1]
 			end
-		else
-			userrow = obj.usercache[name]
 		end
+
+		userrow = obj.usercache[name]
 		
-		if pass ~= server.hashpassword(cn, userrow[1]["pass"]) then
+		if pass ~= server.hashpassword(cn, userrow["pass"]) then
 			alpha.log.message("SETMASTER: %s failed to authenticate", alpha.log.name(cn))
 			return false
 		end
 		
-		alpha.auth.success(cn, userrow[1].priv)
+		print("AUTH SUCCESS!!!!!!!!!!!! OMG")
+		alpha.auth.success(cn, userrow.priv)
 		
 	end,
 	
 	clanreserved = function(obj, name)
+		print("checking name for clan..."..name)
 		for i, row in pairs(obj.clancache) do
 			if string.find(name, row) then
-				return true
+				return true, "FORCE"
 			end
 		end
+		print("not reserved!")
 	end,
 	
 	namereserved = function(obj, name)
-		return obj:_getname(name)
+		print("checking name..."..name)
+		local a, b = obj:_getname(name)
+		if a then return true, "FORCE" end
+		print("not reserved!")
 	end,
 	
 	cleanup = function (obj)
@@ -80,7 +88,7 @@ alpha.auth.plugins.dbauth = {
 		--just for testing these are already filled in :)
 		obj.namecache = { "|TEST|" }
 		obj.usercache = { ["~UT~killme_nl"] = { name = "KILL ME", "A_PASS", 10000000} }
-		obj.clancache = {}
+		obj.clancache = { "_nl"}
 		
 		--TODO: update clanlist here
 	end,

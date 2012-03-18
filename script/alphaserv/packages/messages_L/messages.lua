@@ -30,8 +30,8 @@ message_object = class.new(nil, {
 		data = string.gsub(data, "&", "&00;")
 		data = string.gsub(data, "^", "&01;")
 		data = string.gsub(data, "|", "&02;")
-		data = string.gsub(data, "[", "&03;")
-		data = string.gsub(data, "]", "&04;")
+		data = string.gsub(data, "\\[", "&03;")
+		data = string.gsub(data, "\\]", "&04;")
 		data = string.gsub(data, ";", "&05;")
 		data = string.gsub(data, "\f", "&06;")
 		data = string.gsub(data, "}", "&07;")
@@ -72,7 +72,7 @@ message_object = class.new(nil, {
 		 
 	
 	format = function(self, ...)
-		message_string = message_string % self:escape(arg)
+		self.message_string = self.message_string % self:escape(arg)
 		
 		return self
 	end,

@@ -2,6 +2,7 @@
 conf/core.conf
 conf/defaults.conf
 log/*.log
+log/*.pid
 *_build
 lib/*.so
 lib/*.a

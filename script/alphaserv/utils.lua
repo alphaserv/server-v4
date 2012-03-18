@@ -184,3 +184,7 @@ function _if(expr, true_value, false_value)
         return false_value
     end
 end
+
+function server.hashpassword(cn, password)
+    return crypto.tigersum(string.format("%i %i %s", cn, server.player_sessionid(cn), password))
+end
