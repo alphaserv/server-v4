@@ -1,9 +1,17 @@
 set(MYSQL_DIR "/usr/local/mysql" CACHE STRING "Directory of MySQL installation")
+set(MYSQL_DIR_DEB "/usr/include/mysql" CACHE STRING "Directory of MySQL installation for debain") #XXX debain fix
 
 set(LUASQL_MYSQL_LIBRARY luasql_mysql CACHE INTERNAL "luasql_mysql library")
 
-include_directories(${LUA_INCLUDE_DIRS} ${MYSQL_DIR}/include)
-link_directories(${MYSQL_DIR}/lib)
+include_directories(
+	${LUA_INCLUDE_DIRS}
+	${MYSQL_DIR}/include
+	${MYSQL_DIR_DEB}
+)
+
+link_directories(
+	${MYSQL_DIR}/lib
+)
 
 set(SOURCES
     src/luasql.c

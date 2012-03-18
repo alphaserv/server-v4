@@ -1,0 +1,8 @@
+.svn
+log/*.log
+*_build
+lib/*.so
+lib/*.a
+serverexec
+0
+1
