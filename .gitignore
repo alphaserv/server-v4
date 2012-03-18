@@ -1,4 +1,6 @@
 .svn
+conf/core.conf
+conf/defaults.conf
 log/*.log
 *_build
 lib/*.so

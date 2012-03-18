@@ -43,17 +43,20 @@ alpha.load.file("playervars", "core/playervars", "settings/state variables bound
 alpha.load.file("messages", "core/messages", "send messages to players.")
 --alpha.load.file("master", "core/master", "registration on masterserver.") --use module for this?
 
-alpha.settings._write_config("conf/core.conf")--generate default config
+--generate default config if file not found
+if not server.file_exists("conf/core.conf") then
+	alpha.settings._write_config("conf/core.conf")
+end
+
 alpha.settings._write_config("conf/defaults.conf", "\n#############################\n# Default settings\n#############################\n# \n# Do NOT change,\n# they will be overwritten anyway.")--generate default config
 alpha.settings.load("conf/defaults.conf")
 alpha.settings.load("conf/core.conf")
+
+alpha.settings.load("conf/server.conf")
 trigger_config()
 
 --TODO: move to config
-alpha.package.loadpackage("serverexec")
-alpha.package.loadpackage("cd")
-alpha.package.loadpackage("messages")
-alpha.package.loadpackage("ban")
+dofile('conf/packages.lua')
 
 server.event_handler("started", function()
 	local mem = gcinfo()
