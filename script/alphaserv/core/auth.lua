@@ -1,3 +1,15 @@
+--[[
+	===  ===    ====	 ===	|=|
+	 |	|	|	|   \ 	|	|
+	 |	|	|	|	/ 	|	|
+	 |	 ===	 ===	 ===	|=|
+	 
+	 __
+	 \ \	* stop using pixelart
+	 /_/	* move to module
+
+]]
+
 alpha.auth = {}
 alpha.auth.plugins = {}
 alpha.auth.loggedin = {}

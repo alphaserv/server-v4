@@ -15,7 +15,7 @@ alpha.auth.plugins.dbauth = {
 	end,
 	
 	_getname = function(obj, name)
-		print("name: ", tostring(obj.usercache[name]))
+		--print("name: ", tostring(obj.usercache[name]))
 	
 		local namerow
 		if not alpha.auth.usecaching or not obj.namecache[name] then
@@ -58,26 +58,26 @@ alpha.auth.plugins.dbauth = {
 			return false
 		end
 		
-		print("AUTH SUCCESS!!!!!!!!!!!! OMG")
+		--print("AUTH SUCCESS!!!!!!!!!!!! OMG")
 		alpha.auth.success(cn, userrow.priv)
 		
 	end,
 	
 	clanreserved = function(obj, name)
-		print("checking name for clan..."..name)
+		--print("checking name for clan..."..name)
 		for i, row in pairs(obj.clancache) do
 			if string.find(name, row) then
 				return true, "FORCE"
 			end
 		end
-		print("not reserved!")
+		--print("not reserved!")
 	end,
 	
 	namereserved = function(obj, name)
-		print("checking name..."..name)
+		--print("checking name..."..name)
 		local a, b = obj:_getname(name)
 		if a then return true, "FORCE" end
-		print("not reserved!")
+		--print("not reserved!")
 	end,
 	
 	cleanup = function (obj)
