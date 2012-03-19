@@ -28,6 +28,8 @@ function table_to_string(table, makeup, i)
 	return string
 end
 
+dofile("script/alphaserv/irc.lua")
+
 players = {}
 players.all = server.clients
 players.active = server.players

@@ -1,0 +1,75 @@
+project(socket C)
+set(LUA_SOCKET_LIBRARY socket CACHE INTERNAL "Lua socket")
+
+IF(WIN32)
+	SET(luasocket_PLATFORM_SPECIFIC
+		${CMAKE_CURRENT_SOURCE_DIR}/wsocket.h
+		${CMAKE_CURRENT_SOURCE_DIR}/wsocket.c
+	)
+ELSEIF(UNIX)
+	SET(luasocket_PLATFORM_SPECIFIC
+		${CMAKE_CURRENT_SOURCE_DIR}/usocket.h
+		${CMAKE_CURRENT_SOURCE_DIR}/usocket.c
+	)
+ENDIF(WIN32)
+
+SET(luasocket_SOCKET
+		${CMAKE_CURRENT_SOURCE_DIR}/luasocket.c
+		${CMAKE_CURRENT_SOURCE_DIR}/inet.h
+		${CMAKE_CURRENT_SOURCE_DIR}/inet.c
+		${CMAKE_CURRENT_SOURCE_DIR}/tcp.h
+		${CMAKE_CURRENT_SOURCE_DIR}/tcp.c
+		${CMAKE_CURRENT_SOURCE_DIR}/udp.h
+		${CMAKE_CURRENT_SOURCE_DIR}/udp.c
+		${CMAKE_CURRENT_SOURCE_DIR}/except.h
+		${CMAKE_CURRENT_SOURCE_DIR}/except.c
+		${CMAKE_CURRENT_SOURCE_DIR}/select.h
+		${CMAKE_CURRENT_SOURCE_DIR}/select.c
+		${CMAKE_CURRENT_SOURCE_DIR}/timeout.h
+		${CMAKE_CURRENT_SOURCE_DIR}/timeout.c
+		${CMAKE_CURRENT_SOURCE_DIR}/buffer.h
+		${CMAKE_CURRENT_SOURCE_DIR}/buffer.c
+		${CMAKE_CURRENT_SOURCE_DIR}/io.h
+		${CMAKE_CURRENT_SOURCE_DIR}/io.c
+		${CMAKE_CURRENT_SOURCE_DIR}/auxiliar.h
+		${CMAKE_CURRENT_SOURCE_DIR}/auxiliar.c
+		${CMAKE_CURRENT_SOURCE_DIR}/options.h
+		${CMAKE_CURRENT_SOURCE_DIR}/options.c
+		${luasocket_PLATFORM_SPECIFIC}
+)
+
+SET(luasocket_PUBLIC_HEADERS
+		${CMAKE_CURRENT_SOURCE_DIR}/luasocket.h
+)
+
+
+SET(luasocket_RESOURCE_FILES
+		${CMAKE_CURRENT_SOURCE_DIR}/../lua/http.lua
+		${CMAKE_CURRENT_SOURCE_DIR}/../lua/tp.lua
+		${CMAKE_CURRENT_SOURCE_DIR}/../lua/ftp.lua
+		${CMAKE_CURRENT_SOURCE_DIR}/../lua/smtp.lua
+		${CMAKE_CURRENT_SOURCE_DIR}/../lua/url.lua
+)
+
+SET(luasocketcommon_RESOURCE_FILES
+		${CMAKE_CURRENT_SOURCE_DIR}/../lua/ltn12.lua
+		${CMAKE_CURRENT_SOURCE_DIR}/../lua/socket.lua
+		${CMAKE_CURRENT_SOURCE_DIR}/../lua/mime.lua
+)
+
+include_directories(
+	${LUA_INCLUDE_DIRS}
+)
+
+#install lua files
+file(INSTALL ${CMAKE_CURRENT_SOURCE_DIR}/../lua/socket DESTINATION ${INSTALL_LUA_PACKAGE_DIR})
+
+add_library(${LUA_SOCKET_LIBRARY} SHARED ${luasocket_PUBLIC_HEADERS} ${luasocket_SOCKET})
+target_link_libraries(${LUA_SOCKET_LIBRARY} -lz ${LUA_LIBRARY})
+
+install(TARGETS 
+            ${LUA_SOCKET_LIBRARY}
+        LIBRARY DESTINATION 
+            ${INSTALL_LIBRARY_DIR}
+        ARCHIVE DESTINATION
+            ${INSTALL_ARCHIVE_DIR})

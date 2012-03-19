@@ -3,6 +3,9 @@
 
 #include "lua/event.hpp"
 
+//alphaserv
+extern lua::event< boost::tuple<int, int> >  event_edit;
+
 extern lua::event< boost::tuple<> >                                         event_init;
 extern lua::event< boost::tuple<int, const char *, const char *, const char *, bool> >  event_connecting;
 extern lua::event< boost::tuple<int, bool> >                                event_connect;

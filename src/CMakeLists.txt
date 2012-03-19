@@ -13,8 +13,8 @@ else(NOT IS_DIRECTORY /usr/include/boost)
 endif(NOT IS_DIRECTORY /usr/include/boost)
 add_subdirectory(fungu)
 add_subdirectory(lsqlite3-7)
-add_subdirectory(hopmod/standalone/luapp)
 add_subdirectory(luasql)
+add_subdirectory(socket)
 
 include(CheckLibraryExists)
 
@@ -47,9 +47,10 @@ include_directories(
     ${LUA_INCLUDE_DIRS}
     ${BOOST_INCLUDE_DIRS}
     ${FUNGU_INCLUDE_DIRS}
-    ${OPENSSL_INCLUDE_DIR})
+    ${OPENSSL_INCLUDE_DIR}
+)
 
-add_definitions(-Wall -fsigned-char -DSTANDALONE -DREVISION=$ENV{REVISION} ${LSQLITE3_DEFINITIONS})
+add_definitions(-Wall -fsigned-char -DSTANDALONE -DREVISION=$ENV{REVISION} ${LSQLITE3_DEFINITIONS} -llua_modules)
 
 set(SAUERTOOLS_SOURCES
     shared/tools.cpp
@@ -93,18 +94,22 @@ set(LUA_MODULES_SOURCES
     hopmod/cubescript/lua_command_stack.cpp
     hopmod/cubescript/lua/pcall.cpp
     hopmod/httpserver/filesystem_resource.cpp
-    hopmod/httpserver/lua_module.cpp )
+    hopmod/httpserver/lua_module.cpp
+)
 
-add_library(lua_modules STATIC ${LUA_MODULES_SOURCES})
+set(LUA_MODULE_LIB lua_modules CACHE INTERNAL "lua module library")
 
-target_link_libraries(lua_modules 
+add_library(${LUA_MODULE_LIB} STATIC ${LUA_MODULES_SOURCES})
+
+target_link_libraries(${LUA_MODULE_LIB}
     -pthread sauertools
     ${GEOIP_LIBRARY}
     ${LUA_LIBRARY}
     ${FUNGU_STRING_LIBRARY}
     ${FUNGU_HTTP_LIBRARY}
     ${LSQLITE3_LIBRARY}
-    ${OPENSSL_LIBRARIES})
+    ${OPENSSL_LIBRARIES}
+    ${LUA_SOCKET_LIBRARY})
 
 SET(GAME_SERVER_SOURCES
     engine/server.cpp
@@ -123,7 +128,7 @@ target_link_libraries(sauer_server
     -lrt
     ${BOOST_LIBS}
     sauertools
-    lua_modules
+    ${LUA_MODULE_LIB}
     ${ENET_LIBRARY})
 
 add_executable(keygen hopmod/standalone/keygen.cpp)
@@ -145,4 +150,12 @@ install(TARGETS
 install(FILES 
         hopmod/cubescript/cubescript_library.lua 
     DESTINATION ${PROJECT_SOURCE_DIR}/script/package)
+    
+#luapp
+add_definitions(-DNO_EVENTS -DNO_CORE_TABLE)
 
+add_executable(luapp hopmod/standalone/luapp/luapp.cpp hopmod/lua.cpp)
+
+target_link_libraries(luapp ${LUA_LIBRARY} ${BOOST_SYSTEM_LIBRARY} ${FUNGU_STRING_LIBRARY} ${FUNGU_HTTP_LIBRARY} ${LUA_MODULE_LIB} -lrt -lz)
+
+install(TARGETS luapp RUNTIME DESTINATION ${INSTALL_RUNTIME_DIR}/utils)

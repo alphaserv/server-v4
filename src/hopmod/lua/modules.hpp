@@ -24,5 +24,6 @@ extern "C" {
 #endif
 }
 
+void open_socket_lib(lua_State *L);
 #endif
 

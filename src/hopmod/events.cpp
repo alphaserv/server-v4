@@ -1,4 +1,6 @@
 #include "lua/event.hpp"
+//alphaserv
+lua::event< boost::tuple<int, int> >  event_edit("edit");
 
 lua::event< boost::tuple<> >                                         event_init("init");
 lua::event< boost::tuple<int, const char *, const char *, const char *, bool> >  event_connecting("connecting");
@@ -62,6 +64,9 @@ lua::event< boost::tuple<int, int, int, const char *> >              event_cheat
 void register_event_idents(lua::event_environment & env)
 {
     lua::event_base * events[] = {
+    	//alphaserv
+    	& event_edit,
+    	
         & event_init,
         & event_connecting,
         & event_connect,
