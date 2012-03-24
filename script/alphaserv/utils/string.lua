@@ -16,7 +16,9 @@ function format_duration(seconds)
     return string.format("%02i:%02i:%02i",hours,mins,seconds)
 end
 
-server.format_duration = format_duration
+if not alpha.standalone then
+	server.format_duration = format_duration
+end
 
 function format_duration_str(seconds, table)
 
@@ -64,7 +66,9 @@ function format_duration_str(seconds, table)
     
 end
 
-server.format_duration_str = format_duration_str
+if not alpha.standalone then
+	server.format_duration_str = format_duration_str
+end
 
 function tabulate(text)
     

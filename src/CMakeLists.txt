@@ -152,7 +152,7 @@ install(FILES
     DESTINATION ${PROJECT_SOURCE_DIR}/script/package)
     
 #luapp
-add_definitions(-DNO_EVENTS -DNO_CORE_TABLE)
+add_definitions(-DNO_EVENTS -DNO_CORE_TABLE -DLUAPP_TABLE)
 
 add_executable(luapp hopmod/standalone/luapp/luapp.cpp hopmod/lua.cpp)
 

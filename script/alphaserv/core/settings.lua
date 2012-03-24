@@ -128,7 +128,11 @@ alpha.settings = {
 		file:close()
 	end,
 	load = function(file)
-		exec(file) --just simple cubescript
+		if not alpha.standalone then
+			exec(file) --just simple cubescript
+		else
+			cubescript_library.exec(file)
+		end
 		print("#Succesfully loaded config file: "..file)
 	end
 }

@@ -28,57 +28,65 @@ function table_to_string(table, makeup, i)
 	return string
 end
 
-dofile("script/alphaserv/irc.lua")
+if not alpha.standalone then
+	players = {}
+	players.all = server.clients
+	players.active = server.players
+	players.spectators = server.spectators
+	players.bots = server.bots
 
-players = {}
-players.all = server.clients
-players.active = server.players
-players.spectators = server.spectators
-players.bots = server.bots
-
--- returns a table containing cns of all admins
-players.admins = function()
-	local newlist = {}
-	for _, cn in pairs(players.all()) do
-		if server.player_priv_code(cn)  > server.PRIV_MASTER then table.insert(newlist, cn) end
+	-- returns a table containing cns of all admins
+	players.admins = function()
+		local newlist = {}
+		for _, cn in pairs(players.all()) do
+			if server.player_priv_code(cn)  > server.PRIV_MASTER then table.insert(newlist, cn) end
+		end
+		return newlist
 	end
-	return newlist
-end
 
--- returns a table containing cns of all masters
-players.masters = function()
-	local newlist = {}
-	for _, cn in pairs(server.clients()) do
-		if server.player_priv_code(cn) < server.PRIV_ADMIN and server.player_priv_code(cn) >= server.PRIV_MASTER then table.insert(newlist, cn) end
+	-- returns a table containing cns of all masters
+	players.masters = function()
+		local newlist = {}
+		for _, cn in pairs(server.clients()) do
+			if server.player_priv_code(cn) < server.PRIV_ADMIN and server.player_priv_code(cn) >= server.PRIV_MASTER then table.insert(newlist, cn) end
+		end
+		return newlist
 	end
-	return newlist
-end
 
--- returns a table containing cns of all users
-players.normal = function()
-	local newlist = {}
-	for _, cn in pairs(server.clients()) do
-		if server.player_priv_code(cn) < server.PRIV_MASTER then table.insert(newlist, cn) end
+	-- returns a table containing cns of all users
+	players.normal = function()
+		local newlist = {}
+		for _, cn in pairs(server.clients()) do
+			if server.player_priv_code(cn) < server.PRIV_MASTER then table.insert(newlist, cn) end
+		end
+		return newlist
 	end
-	return newlist
-end
 
--- removes a player from a given list
-players.except = function(players, except_cn)
-	local newlist = {}
-	for _, cn in pairs(players) do
-		if cn ~= except_cn then table.insert(newlist, cn) end
+	-- removes a player from a given list
+	players.except = function(players, except_cn)
+		local newlist = {}
+		for _, cn in pairs(players) do
+			if cn ~= except_cn then table.insert(newlist, cn) end
+		end
+		return newlist
 	end
-	return newlist
-end
 
-players.except_multi = function(players, except_cns)
-	local newlist = {}
-	for _, cn in pairs(players) do
-		if not exept_cns[cn] then table.insert(newlist, cn) end
+	players.except_multi = function(players, except_cns)
+		local newlist = {}
+		for _, cn in pairs(players) do
+			if not exept_cns[cn] then table.insert(newlist, cn) end
+		end
+		return newlist
 	end
-	return newlist
-end
+	
+	function server.hashpassword(cn, password)
+    	return crypto.tigersum(string.format("%i %i %s", cn, server.player_sessionid(cn), password))
+	end
+else
+	function hashpassword(cn, sid, password)
+    	return crypto.tigersum(string.format("%i %i %s", cn, sid, password))
+	end
+end--end of if not alpha.standalone
 
 function tobool (a)
 	if type(a)  == "boolean" then return a end
@@ -185,8 +193,4 @@ function _if(expr, true_value, false_value)
     else
         return false_value
     end
-end
-
-function server.hashpassword(cn, password)
-    return crypto.tigersum(string.format("%i %i %s", cn, server.player_sessionid(cn), password))
 end

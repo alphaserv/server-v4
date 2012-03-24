@@ -2,7 +2,7 @@ if not alpha then error("trying to load 'loader.lua' before alpha init."); retur
 
 module("alpha.load", package.seeall)
 
-
+--TODO: compatible with standalone
 
 local load = {}
 load.files = {}
@@ -69,11 +69,11 @@ file = function (filename, name, description, no_prefix)
 	return normalret
 end
 
-server.event_handler("started", function()
+local function on_started ()
 	local failed = 0
 	local success = 0
 	
---	print(table_to_string(load, true).."<")
+	--	print(table_to_string(load, true).."<")
 	
 	for i, file in pairs(load.files) do
 		if file.loaded then
@@ -81,7 +81,7 @@ server.event_handler("started", function()
 		else
 			failed = failed + 1
 		end
-		
+	
 	end
 
 	if failed > 0 and success > 0 then
@@ -91,5 +91,10 @@ server.event_handler("started", function()
 	else
 		print(string.format("-> Successfully loaded %i scripts", success))
 	end
+end
 
-end)
+if not alpha.standalone then
+	server.event_handler("started", on_started)
+else
+	event.event("started"):add_listner(on_started)
+end

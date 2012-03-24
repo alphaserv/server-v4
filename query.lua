@@ -1,3 +1,7 @@
+package.path = package.path .. ";script/package/?.lua;"
+package.path = package.path .. ";script/?.lua;"
+package.cpath = package.cpath .. ";lib/lib?.so"
+
 putint = function(n)
 		n = tonumber(n)
 		if not n then error("not a number", 1) end
@@ -46,8 +50,8 @@ getstring = function(buffer)
 
 --setup
 socket = require("socket")
-host = arg[1]
-port = arg[2]
+host = arg[1] or "psl.sauerleague.org"
+port = arg[2] or 10001
 udp = socket.udp()
 udp:setpeername(host, port)
 udp:settimeout(3)
