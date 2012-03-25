@@ -3,6 +3,8 @@ package.path = package.path .. ";script/stalkR/?.lua;"
 package.path = package.path .. ";script/?.lua;"
 package.cpath = package.cpath .. ";lib/lib?.so"
 
+PREFIX = "script/stalkR/"
+
 server = core
 native_pcall = pcall
 
@@ -57,9 +59,6 @@ trigger_started:trigger()
 trigger_start:remove()
 trigger_started:remove()
 
-
-print(core.test_func())
-
-PREFIX = "script/stalkR/"
+dofile(PREFIX.."network.lua")
 dofile(PREFIX.."master.lua")
---dofile(PREFIX.."network.lua")
+dofile(PREFIX.."irc/main.lua")

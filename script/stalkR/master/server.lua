@@ -1,4 +1,5 @@
 
+module("master.server", package.seeall)
 server_obj = class.new(nil, {
 	server = nil,
 	accepted_server = nil,
@@ -6,10 +7,10 @@ server_obj = class.new(nil, {
 	remote = {ip = "", port = ""},
 	
 	__init = function(self, ip, port)
-		self.server, error = net.tcp_acceptor(ip, port)
+		self.server, error_ = net.tcp_acceptor(ip, port)
 		
 		if not self.server then
-			error("Failed to open a listen socket on " .. ip .. ":" .. port .. ": " .. error, 1)
+			error("Failed to open a listen socket on " .. ip .. ":" .. port .. ": " .. error_, 1)
 		end
 		
 		self.server:listen()

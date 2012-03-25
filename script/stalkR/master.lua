@@ -39,21 +39,61 @@ end
 server_obj = class.new(nil, {
 	ip = nil,
 	port = nil,
+	info = nil,
+	players = nil,
+	id = nil,
 	
-	__init = function(self, ip, port)
+	connection = nil,
+	
+	__init = function(self, ip, port, id)
 		self.ip = ip
 		self.port = port
+		
+		self.id = id
+		
+		--self:serverinfo()
+		--self:read_info()
+	end,
+	
+	serverinfo = function(self)
+		self.connection = network.extinfo:connect(self.ip, self.port+1)
+
+		self.connection:get_players()
+	end,
+	
+	read_info = function(self)
+		self.connection:read_extinfo()
+		self.connection:close()
+	end,
+	
+	set_gen_info = function(self, info)
+		self.info = nil
+	end,
+	
+	set_players = function(self, players)
+		self.players = players
+	end,
+	
+	add_player = function(self, player)
+		self.players[player.cn] = player
 	end,
 })
 
 function addserver (ip, port)
-	table.insert(servers, server_obj(ip, port))
+	local id = #servers +1
+	servers[id] = server_obj(ip, port, id)
+end
+
+function get_server(id)
+	return servers[id]
 end
 
 function clear_list()
 	servers = {}
 end
 
+
+--addserver ("psl.sauerleague.org", 10000)
 dofile(PREFIX.."master/client.lua")
 dofile(PREFIX.."master/server.lua")
 
