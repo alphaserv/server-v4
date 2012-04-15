@@ -20,6 +20,8 @@ user_obj = class.new(nil, {
 		if self.sid ~= server.player_sessionid(self.cn) then
 			return false
 		end
+		
+		return true
 	end,
 
 	load_groups = function(self)
@@ -132,7 +134,56 @@ user_obj = class.new(nil, {
 	disconnect = function(self)
 		server.player_msg(self.cn, "bb")
 	end,	
-
+	
+	--default stuff
+	msg = function(self, text) return server.player_msg(self.cn, text) end,
+    kick            = function(self, ...) return server.kick(self.cn, unpack(arg)) end,
+    execute_disconnect      = function(self, ...) return server.disconnect(self.cn, unpack(arg)) end,
+    name            = function(self) return server.player_name(self.cn) end,
+    displayname     = function(self) return server.player_displayname(self.cn) end,
+    team            = function(self) return server.player_team(self.cn) end,
+    priv            = function(self) return server.player_priv(self.cn) end,
+    priv_code       = function(self) return server.player_priv_code(self.cn) end,
+    id              = function(self) return server.player_id(self.cn) end,
+    ping            = function(self) return server.player_ping(self.cn) end,
+    lag             = function(self) return server.player_lag(self.cn) end,
+    ip              = function(self) return server.player_ip(self.cn) end,
+    iplong          = function(self) return server.player_iplong(self.cn) end,
+    status          = function(self) return server.player_status(self.cn) end,
+    status_code     = function(self) return server.player_status_code(self.cn) end,
+    frags           = function(self) return server.player_frags(self.cn) end,
+    score           = function(self) return server.player_score(self.cn) end,
+    deaths          = function(self) return server.player_deaths(self.cn) end,
+    suicides        = function(self) return server.player_suicides(self.cn) end,
+    teamkills       = function(self) return server.player_teamkills(self.cn) end,
+    damage          = function(self) return server.player_damage(self.cn) end,
+    damagewasted    = function(self) return server.player_damagewasted(self.cn) end,
+    maxhealth       = function(self) return server.player_maxhealth(self.cn) end,
+    health          = function(self) return server.player_health(self.cn) end,
+    gun             = function(self) return server.player_gun(self.cn) end,
+    hits            = function(self) return server.player_hits(self.cn) end,
+    misses          = function(self) return server.player_misses(self.cn) end,
+    shots           = function(self) return server.player_shots(self.cn) end,
+    accuracy        = function(self) return server.player_accuracy(self.cn) end,
+    accuracy2       = function(self) return server.player_accuracy2(self.cn) end,
+    timetrial       = function(self) return server.player_timetrial(self.cn) end,
+    timeplayed      = function(self) return server.player_timeplayed(self.cn) end,
+    win             = function(self) return server.player_win(self.cn) end,
+    slay            = function(self) return server.player_slay(self.cn) end,
+    changeteam      = function(self,newteam) return server.changeteam(self.cn,newteam) end,
+    bots            = function(self) return server.player_bots(self.cn) end,
+    rank            = function(self) return server.player_rank(self.cn) end,
+    isbot           = function(self) return server.player_isbot(self.cn) end,
+    mapcrc          = function(self) return server.player_mapcrc(self.cn) end,
+    connection_time = function(self) return server.player_connection_time(self.cn) end,
+    force_spec      = function(self) return server.force_spec(self.cn) end,
+    spec            = function(self) return server.spec(self.cn) end,
+    unspec          = function(self) return server.unspec(self.cn) end,
+    setadmin        = function(self) return server.setadmin(self.cn) end,
+    setmaster       = function(self) return server.setmaster(self.cn) end,
+    set_invadmin    = function(self) return server.set_invisible_admin(self.cn) end,
+    set_invisible_admin = function(self) return server.set_inivisible_admin(self.cn) end,
+    pos             = function(self) return server.player_pos(self.cn) end,
 })
 
 _G.user_obj = user_obj
@@ -160,16 +211,16 @@ end
 function OnConnect(cn)
 	users[cn] = user_obj(cn)
 
-	print("connect, table is now: "..table_to_string(users, true, true).." (added: "..table_to_string(users[cn], true, true)..")")
+	--print("connect, table is now: "..table_to_string(users, true, true).." (added: "..table_to_string(users[cn], true, true)..")")
 end
 
 function OnDisconnect(cn)
-	print("%(1)i disconnected" % {cn})
+	--print("%(1)i disconnected" % {cn})
 	users[cn]:disconnect()
 	users[cn] = nil
 end
 
-print("init user events")
+--print("init user events")
 server.event_handler("connect", OnConnect)
 server.event_handler("disconnect", OnDisconnect)
 
@@ -401,7 +452,7 @@ search_obj = class.new(nil, {
 
 function _G.user(search, input)
 	local obj = {}
-	if input and input.is_a and input:is_a(user_obj) then
+	if input and input.is_a and input:is_a(search_obj) then
 		obj = input
 	else
 		obj = search_obj()
@@ -411,7 +462,11 @@ function _G.user(search, input)
 		end
 	end
 	
-	return obj:filter(search)
+	if #search then
+		obj:filter(search)
+	end
+	
+	return obj
 end
 
 function _G.obj_user(search, input)
@@ -420,6 +475,27 @@ function _G.obj_user(search, input)
 	res.user_obj = true
 	
 	return res
+end
+
+function _G.all_obj_user()
+	list_obj = class.new(nil, {
+		list = {},
+		__init = function(self, list)
+			self.list = list
+		end,
+		
+		foreach = function(self, func, ...)
+			for i, row in pairs(self.list) do
+				func(row, ...)
+			end
+		end,
+		
+		raw = function(self)
+			return list
+		end
+	})
+	
+	return list_obj(users)
 end
 
 init()

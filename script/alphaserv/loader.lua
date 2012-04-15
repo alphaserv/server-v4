@@ -41,8 +41,8 @@ file = function (filename, no_prefix)
     end
     
     if alpha.log and alpha.log.debug then --debuging core loaded
-    	alpha.log.debug(alpha.log.debuglevels.INFO, "loaded file: %s" % {filename})
-    	if alpha.spamstartup then print("loaded file: %s" % {filename}) end
+    	alpha.log.debug(alpha.log.debuglevels.INFO, "loaded file: %(1)s" % {filename})
+    	if alpha.spamstartup then print("loaded file: %(1)s" % {filename}) end
     end
 	return normalret
 end

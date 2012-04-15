@@ -84,7 +84,7 @@ end
 
 --on connect
 user_obj.init_stats = function(self)
-	self.stats = {}
+	self.stats = defaults
 	self:reset_stats()
 	
 	for name, value in pairs(get_init_stats(self.cn)) do
@@ -100,8 +100,15 @@ end
 
 --update 1 stat variable
 user_obj.update_stat = function(self, name, type, value)
-	if type == "set" then
+	if not self.stats then
+		--somehow not loaded?
+		self.stats = {}
+	elseif type == "set" then
 		self.stats[name] = value
+	elseif not self.stats[name] then
+		--somehow not inited
+		self.stats[name] = 0
+		self:update_stat(name, type, value)
 	elseif type == "add" then
 		if not value then
 			value = 1
@@ -143,8 +150,6 @@ server.event_handler("shot", function(cn, gun, hit)
 	local user = user_from_cn(cn)
 	user:update_stat("shots", "add")
 	
-	print(table_to_string(user))
-
 	if tostring(hit)=="1" then
 		user_from_cn(cn):update_stat("hits_made", "add")
 	else

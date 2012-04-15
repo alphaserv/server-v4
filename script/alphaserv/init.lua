@@ -21,11 +21,9 @@ dofile('./script/alphaserv/utils/string.lua')
 dofile(alpha.module_prefix.."loader"..alpha.module_extention)
 
 local initmem = gcinfo()
---alpha.load.file("utils", "utils", "util function")
-
 alpha.load.file("core/package")
 
-alpha.load.file("core/settings2")
+alpha.load.file("core/settings")
 alpha.load.file("core/general")
 
 alpha.load.file("core/user")

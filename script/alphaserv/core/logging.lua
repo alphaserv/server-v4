@@ -76,9 +76,9 @@ alpha.log.debuglevel_names = {
 alpha.log.debuglevel = alpha.log.debuglevels.INFO
 
 function alpha.log.debug(level, text)
-	if level <= alpha.log.debuglevel then
-		alpha.log.message("DEBUG (%i): %s", level, text)
-	end
+--	if level <= alpha.log.debuglevel then
+		alpha.log.message_to("DEBUG %s(%i): %s", "debug", alpha.log.debuglevel_names[level], level, text)
+--	end
 end
 
 _G.log_msg = alpha.log.debug
