@@ -1,2 +1,2 @@
 
-alpha.settings.init_setting("servername", "Alphaserv1", "string", "unique name of the server.")
+alpha.settings.new_setting("servername", "Alphaserv1", "unique name of the server.")

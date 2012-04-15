@@ -23,40 +23,42 @@ dofile(alpha.module_prefix.."loader"..alpha.module_extention)
 local initmem = gcinfo()
 --alpha.load.file("utils", "utils", "util function")
 
-alpha.load.file("package", "core/package", "package manager")
+alpha.load.file("core/package")
 
-alpha.load.file("settings", "core/settings", "settings library")
-alpha.load.file("general", "core/general", "generel serverwide used settings")
+alpha.load.file("core/settings2")
+alpha.load.file("core/general")
 
-alpha.load.file("user", "core/user", "user api")
+alpha.load.file("core/user")
 
-alpha.load.file("db", "core/db", "database abstraction layer")
-alpha.load.file("logging", "core/logging", "log events to file")
+alpha.load.file("core/db")
+alpha.load.file("core/logging")
 
 --alpha.load.file("wcp_connection", "core/wcp_connection", "connection with web control panel")
 
-alpha.load.file("authkey", "core/auth/core", "authkey auth hopmod implementation")
-alpha.load.file("auth", "core/auth", "authenticate users and masterkey owners")
+alpha.load.file("core/auth/core")
 
---alpha.load.file("acl", "core/acl", "access contro list, not finished.")
-alpha.load.file("playervars", "core/playervars", "settings/state variables bound to specific players.")
-alpha.load.file("messages", "core/messages", "send messages to players.")
 --alpha.load.file("master", "core/master", "registration on masterserver.") --use module for this?
 
 --generate default config if file not found
-if not server.file_exists("conf/core.conf") then
-	alpha.settings._write_config("conf/core.conf")
+if not server.file_exists("conf/core.lua") then
+	alpha.settings.write("conf/core.lua")
 end
 
-alpha.settings._write_config("conf/defaults.conf", "\n#############################\n# Default settings\n#############################\n# \n# Do NOT change,\n# they will be overwritten anyway.")--generate default config
-alpha.settings.load("conf/defaults.conf")
-alpha.settings.load("conf/core.conf")
+alpha.settings.write(
+	"conf/defaults.lua",
+	"-----------------------------\n"..
+	"--[[\n"..
+	"	Default settings\n"..
+	"	Do NOT change,\n"..
+	"	they will be overwritten anyway.\n"..
+	"]]--\n"..
+	"-----------------------------\n\n")--generate default config
 
-alpha.settings.load("conf/server.conf")
+alpha.load.file("conf/defaults.lua", true)
+alpha.load.file("conf/core.lua", true)
+
+exec("conf/server.conf")
 trigger_config()
-
---TODO: move to config
-dofile('conf/packages.lua')
 
 server.event_handler("started", function()
 	local mem = gcinfo()

@@ -60,7 +60,7 @@ function loadpackage(name, version)
 	local_package_path = string.format("%s%s_%s/", package_path, name, version)
 	
 	for _, file in pairs(info.load) do
-		alpha.load.file(local_package_path..file, local_package_path..file, info.description, true)
+		alpha.load.file(local_package_path..file, true)
 	end
 	
 	loaded[string.format('%s_%s', name, version)] = true

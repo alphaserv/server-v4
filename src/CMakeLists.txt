@@ -151,11 +151,12 @@ install(FILES
         hopmod/cubescript/cubescript_library.lua 
     DESTINATION ${PROJECT_SOURCE_DIR}/script/package)
     
+#DON'T COMPILE BOTH LUAPP AND SERVER -> BUG
 #luapp
-add_definitions(-DNO_EVENTS -DNO_CORE_TABLE -DLUAPP_TABLE)
+#add_definitions(-DNO_EVENTS -DNO_CORE_TABLE -DLUAPP_TABLE)
 
-add_executable(luapp hopmod/standalone/luapp/luapp.cpp hopmod/lua.cpp)
+#add_executable(luapp hopmod/standalone/luapp/luapp.cpp hopmod/lua.cpp)
 
-target_link_libraries(luapp ${LUA_LIBRARY} ${BOOST_SYSTEM_LIBRARY} ${FUNGU_STRING_LIBRARY} ${FUNGU_HTTP_LIBRARY} ${LUA_MODULE_LIB} -lrt -lz)
+#target_link_libraries(luapp ${LUA_LIBRARY} ${BOOST_SYSTEM_LIBRARY} ${FUNGU_STRING_LIBRARY} ${FUNGU_HTTP_LIBRARY} ${LUA_MODULE_LIB} -lrt -lz)
 
-install(TARGETS luapp RUNTIME DESTINATION ${INSTALL_RUNTIME_DIR}/utils)
+#install(TARGETS luapp RUNTIME DESTINATION ${INSTALL_RUNTIME_DIR}/utils)

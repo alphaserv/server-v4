@@ -1,3 +1,4 @@
+--[[
 if not alpha then error("trying to load 'settings.lua' before alpha init."); return end
 
 alpha.settings = {
@@ -6,7 +7,7 @@ alpha.settings = {
 		if alpha.settings.settings[name] then error("this setting's name is already in use")end
 		local t = 's'
 		local typecast = function () end
-		if type_ == "string" or type_ == "char" or type_ == "const char" --[[ for c++ gurus ]] then
+		if type_ == "string" or type_ == "char" or type_ == "const char" --[ [ for c++ gurus ] ] then
 			t = 's'
 			default_value = tostring(default_value)
 			typecast = tostring
@@ -30,12 +31,12 @@ alpha.settings = {
 	end,
 	
 	get = function(obj, name)
-		if not obj.settings[name] then error("could not find setting") end
+		if not obj.settings[name] then error("could not find setting", 1) end
 		return obj.settings[name]:get()
 	end,
 	
 	set = function(obj, name, value)
-		if not obj.settings[name] then error("could not find setting") end
+		if not obj.settings[name] then error("could not find setting", 1) end
 		if value == nil then error("cannot set setting to nil") end
 		return obj.settings[name]:set(value)
 	end,
@@ -143,4 +144,4 @@ function server.cfg(name, value)
 end
 function server.cfg_get(name)
 	return alpha.settings:get(name)
-end
+end]]

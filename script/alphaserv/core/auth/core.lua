@@ -14,8 +14,8 @@ auth.request_status = {
     TIMEOUT = 5             -- not waiting any longer
 }
 
-alpha.load.file("directory", "core/auth/directory", "directory")
-alpha.load.file("client", "core/auth/client", "directory")
+alpha.load.file("core/auth/directory")
+alpha.load.file("core/auth/client")
 
 local requests = {}
 local next_request_id = 1

@@ -1,8 +1,12 @@
 function pack(...) return arg end
 
 local ii = 0
-function table_to_string(table, makeup, i)
-	if not makeup then makeup = true end
+function table_to_string(table, makeup, reset)
+	if makeup == nil then makeup = true end
+	
+	if reset then
+		ii = 0
+	end
 	
 	ii = ii + 1
 	if ii > 500 then

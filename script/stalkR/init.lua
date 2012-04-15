@@ -35,14 +35,18 @@ local initmem = gcinfo()
 alpha.load.file("package", "core/package", "package manager")
 
 alpha.load.file("settings", "core/settings", "settings library")
-
+alpha.load.file("db", "core/db", "database")
 --generate default config if file not found
 
+--[[
 alpha.settings._write_config("conf/defaults_stalkR.conf", "\n#############################\n# Default settings\n#############################\n# \n# Do NOT change,\n# they will be overwritten anyway.")--generate default config
 alpha.settings.load("conf/defaults_stalkR.conf")
---alpha.settings.load("conf/core.conf")
+alpha.settings.load("conf/core.conf")
+]]
 
 trigger_config:trigger()
+alpha.db:open("mysql")
+alpha.db:connect()
 
 --TODO: move to config
 dofile('conf/stalkR_packages.lua')
@@ -58,6 +62,8 @@ trigger_start:trigger()
 trigger_started:trigger()
 trigger_start:remove()
 trigger_started:remove()
+
+--dofile(PREFIX.."web/init.lua")
 
 dofile(PREFIX.."network.lua")
 dofile(PREFIX.."master.lua")

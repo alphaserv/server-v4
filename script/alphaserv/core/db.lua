@@ -1,15 +1,33 @@
 if not alpha then error("trying to load 'db.lua' before alpha init."); return end
 
-local db_load = server.create_event_signal("db_loaded")
-
-alpha.settings.init_setting("db_host", "localhost", "string", "the host of the database to use")
-alpha.settings.init_setting("db_port", 3306, "int", "the port of the database to use")
-alpha.settings.init_setting("db_dbname", "alphaserv", "string", "the name of the database to use")
-alpha.settings.init_setting("db_username", "alphaserv", "string", "the username of the database user to use")
-alpha.settings.init_setting("db_password", "alphaserv", "string", "the password of the database user to use")
+local db_load
+if not alpha.standalone then
+	db_load = server.create_event_signal("db_loaded")
+end
 
 local RECONNECT = 3000
 local connected = false
+
+
+alpha.settings.register_type("dbvar", class.new(alpha.settings.setting_obj, {
+
+	set = function(self, value)
+		if not connected then
+			self.setting = value
+		else
+			error('NOT IMPLEMENTED: changing mysql connection settings while connected, please disconnect first', 2)	
+		end
+		
+		return self
+	end
+
+}))
+
+local db_host = alpha.settings.new_setting("db_host", "localhost", "the host of the database to use", "dbvar")
+local db_port = alpha.settings.new_setting("db_port", 3306, "the port of the database to use", "dbvar")
+local db_name = alpha.settings.new_setting("db_dbname", "alphaserv", "the name of the database to use", "dbvar")
+local db_username = alpha.settings.new_setting("db_username", "alphaserv", "the username of the database user to use", "dbvar")
+local db_password = alpha.settings.new_setting("db_password", "alphaserv", "the password of the database user to use", "dbvar")
 
 local resultobject = {
 	sql_result = nil,
@@ -71,11 +89,11 @@ alpha.db = {
 		if not obj.env then error('Please open an enviroment first') end
 		obj.connection = assert(
 			obj.env:connect(
-				alpha.settings:get('db_dbname'),
-				alpha.settings:get('db_username'),
-				alpha.settings:get('db_password'),
-				alpha.settings:get('db_host'),
-				alpha.settings:get('db_port')
+				db_name:get(),
+				db_username:get(),
+				db_password:get(),
+				db_host:get(),
+				db_port:get()
 			)
 		)
 		obj.connected = true
@@ -136,37 +154,11 @@ alpha.db = {
 	end
 }
 
---try to reconnect when a variable changes
-local function varchange(_, _, name)
-	if connected then
-		--[[
-		if not db.connect()
-		if success then
-			return true
-		else
-			--invalid
-			error('Could not change mysql connection setting variable, INVALID')
-			return false
-		end]]
-		error('NOT IMPLEMENTED: changing mysql connection settings while connected, please disconnect first')
-	else
-		return true
-	end
-end
-
-server.event_handler("started", function()
-	alpha.db:open("mysql")
-	alpha.db:connect()
-	db_load()
-	server.cancel_event_signal("db_loaded")
-end)
-
---TODO: make api for this
-if not alpha.settings.settings['db_host'].triggers.set then alpha.settings.settings['db_host'].triggers.set = {} end
-alpha.settings.settings['db_host'].triggers.set[#alpha.settings.settings['db_host'].triggers.set+1] = varchange
-if not alpha.settings.settings['db_port'].triggers.set then alpha.settings.settings['db_port'].triggers.set = {} end
-alpha.settings.settings['db_port'].triggers.set[#alpha.settings.settings['db_port'].triggers.set+1] = varchange
-if not alpha.settings.settings['db_username'].triggers.set then alpha.settings.settings['db_username'].triggers.set = {} end
-alpha.settings.settings['db_username'].triggers.set[#alpha.settings.settings['db_username'].triggers.set+1] = varchange
-if not alpha.settings.settings['db_password'].triggers.set then alpha.settings.settings['db_password'].triggers.set = {} end
-alpha.settings.settings['db_password'].triggers.set[#alpha.settings.settings['db_password'].triggers.set+1] = varchange
+if not alpha.standalone then
+	server.event_handler("started", function()
+		alpha.db:open("mysql")
+		alpha.db:connect()
+		db_load()
+		server.cancel_event_signal("db_loaded")
+	end)
+end 

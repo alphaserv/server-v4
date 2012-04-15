@@ -181,8 +181,14 @@ network_obj = class.new(nil, {
 	command = function(self, nick, channel, command)
 		local commands
 		commands = {
-			say = function(command, ...)
+			say = function(_, ...)
 				self:send("PRIVMSG %(1)s :%(2)s", function() end, channel, table.concat(arg, " "))
+			end,
+			
+			stats= function(_, name)
+				for _, row in pairs(alpha.db:query("SELECT id, name, country, team, frags, deaths, suicides, misses, shots, hits_made, hits_get, tk_made, tk_get, flags_returned, flags_stolen, flags_gone, flags_scored, total_scored, win, rank FROM stats_users WHERE name = ? LIMIT 3;", name or "bot"):fetch()) do
+					self:send("PRIVMSG %(1)s :STATS %(2)s", function() end, channel, string.format("id: %i, name %s, country %s, team %s, frags %i, deaths %s, suicides %s, misses %s, shots %i, hits_made %i, hits_get %i, tk_made %i, tk_get %i, flags_returned %i, flags_stolen %i, flags_gone %s, flags_scored %i, total_scored %i, win %i, rank %i", row.id, row.name, row.country, row.team, row.frags, row.deaths, row.suicides, row.misses, row.shots, row.hits_made, row.hits_get, row.tk_made, row.tk_get, row.flags_returned, row.flags_stolen, row.flags_gone, row.flags_scored, row.total_scored, row.win, row.rank))
+				end
 			end,
 			
 			help = function(_, command)
@@ -207,7 +213,10 @@ network_obj = class.new(nil, {
 			command = command:split(" ")
 			
 			if commands[command[1]] then
-				commands[command[1]](unpack(command))
+				local return_, error_ = pcall(commands[command[1]], unpack(command))
+				if not return_ and error_ then
+					self:send("PRIVMSG %(1)s :<%(2)s> %(3)s -> error on execution ?!", function() end, channel, command[1], error_ )
+				end
 			else
 				self:send("PRIVMSG %(1)s :<%(2)s> %(3)s -> command not found ?!", function() end, channel, nick, table.concat(command, " ") )
 			end

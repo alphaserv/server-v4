@@ -1,24 +1,14 @@
 module("player.settings", package.seeall)
 
-function load_user(user_id)
-	local player = server.player({user_id = user_id})
-	
-	local result = alpha.db:query("SELECT module, name, data FROM user_data WHERE user_id = ? AND module <> \"WEB\";", user_id)
-	
-	if result and reult:num_rows() > 0 then
-		player:load_settings(result:fetch())
-	end	
-end
-
 --extend the player object:
-player.settings = {}
-player.load_defaults = function(self)
+user_obj.settings = {}
+--[[user_obj.load_defaults = function(self)
 	local result = alpha.db:query("SELECT module, name, data FROM user_data WHERE user_id = -1 AND module <> \"WEB\";"):fetch()
 	
 	self:load_settings(result)
-end
+end]]
 
-player.load_settings = function(self, settings)
+user_obj.load_settings = function(self, settings)
 	for _, row in pairs(settings) do
 	
 		--create module settings table if needed
@@ -30,7 +20,7 @@ player.load_settings = function(self, settings)
 	end	
 end
 
-player.option = function (self, module, name)
+user_obj.option = function (self, module, name)
 
 	if self.settings[module] == nil or self.settings[module][name] == nil then
 		error("Could not find setting[%(1)s ; %(2)s]" % { module, name })
@@ -38,3 +28,21 @@ player.option = function (self, module, name)
 	
 	return self.settings[module][name]
 end
+
+
+user_obj.init_settings = function(self)
+	
+	local result = alpha.db:query("SELECT module, name, data FROM user_data WHERE user_id = ? AND module <> \"WEB\";", user_id)
+	
+	if result and reult:num_rows() > 0 then
+		self:load_settings(result:fetch())
+	end
+	
+	user.inited_settings = true
+end
+--[[
+local init = user_obj.__init
+user_obj.__init = function(self, ...)
+	self:init_settings()
+	init(self, ...)
+end]]

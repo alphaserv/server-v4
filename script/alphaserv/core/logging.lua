@@ -38,9 +38,11 @@ function alpha.log.write_line(file, message)
 end
 
 function alpha.log.close_all()
+	server.sleep(1, function()
 	for name, value in pairs(alpha.log.openedfiles) do
-		alpha.log.close(name)
+		alpha.log.close_file(name)
 	end
+	end)
 end
 
 function alpha.log.name(cn)
@@ -60,6 +62,10 @@ alpha.log.debuglevels = {
 	INFO = 3,
 }
 
+for i, level in pairs(alpha.log.debuglevels) do
+	_G["LOG_"..i] = level
+end
+
 alpha.log.debuglevel_names = {
 	[alpha.log.debuglevels.FATAL] = "fatal",
 	[alpha.log.debuglevels.ERROR] = "error",
@@ -67,13 +73,15 @@ alpha.log.debuglevel_names = {
 	[alpha.log.debuglevels.INFO] = "info",
 }
 
-alpha.log.debuglevel = alpha.log.debuglevels.NOTICE
+alpha.log.debuglevel = alpha.log.debuglevels.INFO
 
 function alpha.log.debug(level, text)
 	if level <= alpha.log.debuglevel then
 		alpha.log.message("DEBUG (%i): %s", level, text)
 	end
 end
+
+_G.log_msg = alpha.log.debug
 
 function alpha.log_event(a, name, ...)
 	local returning = "Event "..name
