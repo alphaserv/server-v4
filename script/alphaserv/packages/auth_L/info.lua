@@ -1,12 +1,14 @@
 
 return {
-	name = "authing",
+	name = "authentication core",
 	dependics = {
-		"messages",
-		"acl"
+		"messages"
 	},
 	load = {
-		"auth.lua"
+		"auth.lua",
+		"auto_master.lua",
+		"setmaster_1.lua", 
+		"alphaserv_db_auth.lua"
 	}
 }
 	
