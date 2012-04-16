@@ -14,7 +14,17 @@ end
 
 user_obj.is_locked = function(self)
 	if not self.locks then self.locks = {} end
-	return #self.locks > 0
+	
+	local i = 0
+	for j, lock in pairs(self.locks) do
+		if not lock:is_locked(self) then
+			self.locks[j] = nil
+		else
+			i = i + 1
+		end
+	end
+	
+	return i > 0
 end
 
 user_obj.spec = function(self)
@@ -24,7 +34,7 @@ user_obj.spec = function(self)
 	end
 	
 	server.spec(self.cn)
-	server.msg("spec")
+	log_msg(LOG_INFO, "unspecing %(1)s" % {self.cn})
 end
 
 user_obj.unspec = function(self)
@@ -34,7 +44,7 @@ user_obj.unspec = function(self)
 	end
 	
 	server.unspec(self.cn)
-	server.msg("unspec")
+	log_msg(LOG_INFO, "unsepecing %(1)s" % {self.cn})
 end
 
 user_obj.add_speclock = function(self, module, lock)
@@ -53,28 +63,39 @@ user_obj.remove_speclock = function(self, module)
 	self.locks[module]:unlock(self)
 	self.locks[module] = nil
 	
-	--auto unspec
 	self:check_locks()
+	if not self:is_locked() then
+		self:unspec()
+	end
 end
 
-user_obj.check_locks = function(self)
+user_obj.check_locks = function(self, way)
 
+	log_msg(LOG_INFO, "Checking locks for player %(1)s" % {self.cn})
 	local i = 0
-	for i, lock in pairs(self.locks) do
+	for j, lock in pairs(self.locks) do
 		if not lock:is_locked(self) then
-			self.locks[i] = nil
+			self.locks[j] = nil
 		else
 			i = i + 1
 		end
 	end
 	
-	if i == 0 then
-		self:unspec()
+	server.msg("locks: "..i)
+	
+	if i ~= 0 and way == "0" then
+		server.msg("blocked (un)spec")
+		self:spec()
 	end
 end
 
 events = { spec = nil }
 
-events.spec = server.event_handler("spectator", function(cn)
-	user_from_cn(cn):check_locks()
+events.spec = server.event_handler("spectator", function(cn, way)
+	
+	way = tostring(way)
+	local user = user_from_cn(cn)
+	user:check_locks(way)
+	
+	server.msg("way == "..way)
 end)

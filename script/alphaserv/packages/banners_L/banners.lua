@@ -88,8 +88,9 @@ function set_interval(secs)
 	
 	if auto_banner then
 		stop_auto_banner()
-		
-		--make shure that the banner kills itself before restarting
-		server.sleep(show_interval + 1000, start_auto_banner)
 	end
+	
+			
+	--make shure that the banner kills itself before restarting
+	server.sleep(old_interval + 1000, start_auto_banner)
 end

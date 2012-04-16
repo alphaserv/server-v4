@@ -26,12 +26,12 @@ message_object = class.new(nil, {
 			
 			return ret
 		end
-		
+
 		data = string.gsub(data, "&", "&00;")
-		data = string.gsub(data, "^", "&01;")
+		data = string.gsub(data, "%^", "&01;")
 		data = string.gsub(data, "|", "&02;")
-		data = string.gsub(data, "\\[", "&03;")
-		data = string.gsub(data, "\\]", "&04;")
+		data = string.gsub(data, "%[", "&03;")
+		data = string.gsub(data, "%]", "&04;")
 		data = string.gsub(data, ";", "&05;")
 		data = string.gsub(data, "\f", "&06;")
 		data = string.gsub(data, "}", "&07;")
@@ -54,18 +54,18 @@ message_object = class.new(nil, {
 			return ret
 		end
 
-		data = string.gsub(data, "&00;", "&")
-		data = string.gsub(data, "&01;", "^ ")
-		data = string.gsub(data, "&02;", "|")
-		data = string.gsub(data, "&03;", "[")
-		data = string.gsub(data, "&04;", "]")
-		data = string.gsub(data, "&05;", ";")
-		data = string.gsub(data, "&06;", "\\f")
-		data = string.gsub(data, "&07;", "}")
-		data = string.gsub(data, "&08;", "{")
-		data = string.gsub(data, "&09;", "\\")
-		data = string.gsub(data, "&10;", ">")
-		data = string.gsub(data, "&11;", "<")
+		data = string.gsub(data, "%&00;", "&")
+		data = string.gsub(data, "%&01;", "^ ")
+		data = string.gsub(data, "%&02;", "|")
+		data = string.gsub(data, "%&03;", "[")
+		data = string.gsub(data, "%&04;", "]")
+		data = string.gsub(data, "%&05;", ";")
+		data = string.gsub(data, "%&06;", "\\f")
+		data = string.gsub(data, "%&07;", "}")
+		data = string.gsub(data, "%&08;", "{")
+		data = string.gsub(data, "%&09;", "\\")
+		data = string.gsub(data, "%&10;", ">")
+		data = string.gsub(data, "%&11;", "<")
 	
 		return data
 	end,

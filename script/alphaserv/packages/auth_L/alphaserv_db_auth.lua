@@ -112,7 +112,7 @@ alphaserv_db_auth_obj = class.new(auth.auth_obj, {
 					
 			--simple rule without id or specific value
 			else
-				user.user_overrides[rule][-1] = true
+				user.user_overrides[rule] = { [-1] = true }
 			end
 		end
 		
