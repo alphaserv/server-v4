@@ -52,6 +52,9 @@ user_obj.remove_speclock = function(self, module)
 	if not self.locks[module] then return end
 	self.locks[module]:unlock(self)
 	self.locks[module] = nil
+	
+	--auto unspec
+	self:check_locks()
 end
 
 user_obj.check_locks = function(self)
@@ -72,6 +75,6 @@ end
 
 events = { spec = nil }
 
-events.spec = server.event_handler("spectator", function()
-	user_obj({cn = cn}):check_locks()
+events.spec = server.event_handler("spectator", function(cn)
+	user_from_cn(cn):check_locks()
 end)

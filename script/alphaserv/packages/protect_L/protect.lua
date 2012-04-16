@@ -8,7 +8,8 @@ function should_auth(cn)
 	
 	if instance:namereserved(name) or instance:clanreserved(name) then
 		--already authed
-		if instance:_getname(name).id == user.user_id then
+		local name = instance:_getname(name)
+		if name and name.id == user.user_id then
 			return false
 		end
 		

@@ -12,7 +12,8 @@ alphaserv_db_auth_obj = class.new(auth.auth_obj, {
 		local res = alpha.db:query("SELECT id, tag FROM clans"):fetch()
 		
 		for i, row in pairs(res) do
-			clantags[row.id] = row.tag
+			log_msg(LOG_INFO, "Adding tag %(1)s to the clantag list" % { row.tag })
+			self.clantags[row.id] = row.tag
 		end
 		
 		res = nil
@@ -32,9 +33,13 @@ alphaserv_db_auth_obj = class.new(auth.auth_obj, {
 	end,
 
 	clanreserved = function(self, name)
-		self.init_clantags()
-		for i, row in pairs(self.clantags) do
-			if string.find(name, row) then
+		self:init_clantags()
+		
+		log_msg(LOG_INFO, "Checking clantags for name %(1)s" % {name})
+		
+		for id, tag in pairs(self.clantags) do
+			if string.find(name, tag) then
+				log_msg(LOG_INFO, "clantag match %(1)s on %(2)s" % { tag, name })
 				return true
 			end
 		end

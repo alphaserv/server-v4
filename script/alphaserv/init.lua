@@ -1,6 +1,7 @@
 alpha = {}
 alpha.fn = {} --extern accesable functions
 alpha.spamstartup = false --Default: false
+alpha.init_done = false
 geoip = require("geoip")
 
 require "language.init"
@@ -68,4 +69,4 @@ end)
 trigger_start()
 server.cancel_event_signal("pre_started")
 server.cancel_event_signal("config_loaded")
-
+alpha.init_done = true

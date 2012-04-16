@@ -78,6 +78,10 @@ alpha.log.debuglevel = alpha.log.debuglevels.INFO
 function alpha.log.debug(level, text)
 --	if level <= alpha.log.debuglevel then
 		alpha.log.message_to("DEBUG %s(%i): %s", "debug", alpha.log.debuglevel_names[level], level, text)
+		
+		if not alpha.init_done and alpha.spamstartup then
+			print(string.format("DEBUG %s(%i): %s", "debug", alpha.log.debuglevel_names[level], level, text))
+		end
 --	end
 end
 
