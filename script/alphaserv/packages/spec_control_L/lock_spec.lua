@@ -65,7 +65,7 @@ user_obj.check_locks = function(self)
 		end
 	end
 	
-	if i ~= 0 then
+	if i == 0 then
 		self:unspec()
 	end
 end

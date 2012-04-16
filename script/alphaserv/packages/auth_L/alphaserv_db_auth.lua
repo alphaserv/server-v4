@@ -74,7 +74,7 @@ alphaserv_db_auth_obj = class.new(auth.auth_obj, {
 
 		--password incorrect
 		if hash ~= server.hashpassword(cn, userrow["pass"]) then
-			server.msg(hash.." ~= "..userrow.pass)
+			--server.msg(hash.." ~= "..userrow.pass)
 			return false
 		end
 		
