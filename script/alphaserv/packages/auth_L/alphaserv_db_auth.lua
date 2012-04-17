@@ -8,7 +8,7 @@ alphaserv_db_auth_obj = class.new(auth.auth_obj, {
 	clantags_loaded = false,
 	
 	init_clantags = function(self)
-		if self.clantags_loaded then return end
+		if self.clantags_loaded == true then return end
 		local res = alpha.db:query("SELECT id, tag FROM clans"):fetch()
 		
 		for i, row in pairs(res) do
