@@ -97,7 +97,7 @@ user_obj = class.new(nil, {
 					rules_groups.rule_id AS id,
 					rules.name AS name,
 					rules.on AS on_id,
-					rules_groups.order,
+					rules_groups.order_by,
 					rules_groups.type AS allow
 			
 				FROM
@@ -119,7 +119,7 @@ user_obj = class.new(nil, {
 				AND
 					rules.on = ?
 				ORDER BY
-					rules_groups.order]], self.user_id, name, id)
+					rules_groups.order_by]], self.user_id, name, id)
 			
 			if res:num_rows() > 0 then
 				return tonumber(res:fetch()[1].allow) == 1

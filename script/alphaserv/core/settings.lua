@@ -89,10 +89,12 @@ writers = {
 setting_obj = class.new(nil, {
 	setting = "",
 	description = "",
+	name = "",
 	
-	__init = function(self, value, description)
+	__init = function(self, value, description, name)
 		self.setting = value
 		self.description = description
+		self.name = name
 	end,
 	
 	write = function(self, name)

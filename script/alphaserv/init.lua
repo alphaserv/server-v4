@@ -36,8 +36,6 @@ alpha.load.file("core/logging")
 
 alpha.load.file("core/auth/core")
 
---alpha.load.file("master", "core/master", "registration on masterserver.") --use module for this?
-
 --generate default config if file not found
 if not server.file_exists("conf/core.lua") then
 	alpha.settings.write("conf/core.lua")

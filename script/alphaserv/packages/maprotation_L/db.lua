@@ -3,11 +3,80 @@ require "crypto" --for mapcrc
 module("maprotation.db", package.seeall)
 alpha.settings.init_setting("maprotation:allow_unkown_maps", true, "bool", "choose to accept map wich arn't in the database.")
 
-function disallow_map(mapname, gamemode)
-
+--TODO: move to utils
+function table.contains(table, element)
+  for _, value in pairs(table) do
+    if value == element then
+      return true
+    end
+  end
+  return false
 end
 
-function send_motd(map, mapname, gamemode)
+function install_maps(table)
+	local maps = table or maps.maps
+
+	local flags
+	local allow_coop
+	local bases
+	local items
+	
+	local errors = {}
+
+	for mapname, map in pairs(maps) do
+		flags = 0
+		allow_coop = 1
+		bases = 0
+		items = 0
+		
+		if table.contains(modes["insta ctf"], mapname) then
+			flags = 1
+		end
+
+		if table.contains(modes["capture"], mapname) then
+			bases = 1
+		end
+
+		if table.contains(modes["ffa"], mapname) then
+			items = 1
+		end
+				
+		local success, error = pcall(function()
+			alpha.db:query([[
+				INSERT INTO
+					maps
+					(
+						name,
+						plays, 
+						flags, 
+						bases, 
+						allow_coop, 
+						map_motd, 
+						crc
+					)
+				VALUES
+					(
+						?,
+						0,
+						?,
+						?,
+						?,
+						?,
+						?
+					)
+				]], mapname, flags, bases, allow_coop, map.motds[mapname] or "", map.crc)
+		end)
+		
+		if not success then
+			table.insert(errors, error)
+		end
+	end
+	
+	if #errors == 0 then
+		return true
+	else
+		return false, errors
+	end
 end
 
 function add_play(map, mapname, gamemode)
@@ -20,14 +89,23 @@ function add_play(map, mapname, gamemode)
 end
 
 function get_map(name)
-	return alpha.db:query("SELECT id, name, plays, flags, bases, allow_coop, map_motd, crc FROM maps WHERE name = ? ;", name)
+	local res = alpha.db:query("SELECT id, name, plays, flags, bases, allow_coop, map_motd, crc FROM maps WHERE name = ?;", name)
+	
+	if not res or res:num_rows() < 1 then
+		return false
+	else
+		return true, res:fetch()[1]
+	end
 end
 
 function allowed(map, gamemode)
-	if (tonumber(map.allow_coop) == 0 and string.find(gamemode, 'coop'))
-		or (tonumber(map.flags) == 0 and string.find(gamemode, 'ctf'))
-		or (tonumber(map.bases) == 0 and (string.find(gamemode, 'capture') or string.find(gamemode, 'hold')))
-			then
+	if
+		(tonumber(map.allow_coop) == 0 and string.find(gamemode, 'coop'))
+	or
+		(tonumber(map.flags) == 0 and string.find(gamemode, 'ctf'))
+	or
+		(tonumber(map.bases) == 0 and (string.find(gamemode, 'capture') or string.find(gamemode, 'hold')))
+	then
 		return false
 	else
 		return true
@@ -35,11 +113,10 @@ function allowed(map, gamemode)
 end
 
 function on_load(mapname, gamemode)
-	local result = get_map(mapname)
+	local result, row = get_map(mapname)
 	
-	if not result or result:num_rows() ~= 1 then
-		--unkown map
-		alpha.log.message("could not find map %q", mapname)
+	if not result then
+		log_msg(LOG_WARNING, "Could not find map %(1)s" % { mapname })
 		
 		if tonumber(alpha.settings:get("maprotation:allow_unkown_maps")) ~= 1 then
 			disallow_map(mapname, gamemode, false)
@@ -60,8 +137,8 @@ function on_load(mapname, gamemode)
 end
 
 function vote (mapname, gamemode)
-	local map = get_map()
-	if map:num_rows() < 1 then
+	local result, row = get_map()
+	if not result then
 		--unkown map
 		
 		if tonumber(alpha.settings:get("maprotation:allow_unkown_maps")) ~= 1 then
@@ -70,7 +147,7 @@ function vote (mapname, gamemode)
 		end
 		
 	else
-		map = map:fetch()[1]
+		local map = row:fetch()[1]
 	
 		if not allowed(map, gamemode) then
 			disallow_map(mapname, gamemode, true, true)

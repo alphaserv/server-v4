@@ -58,6 +58,16 @@ alpha.settings.set ("db_username", "alphaserv")
 
 ----------------------------
 --[[
+#Name: server_id
+#Description: unique id of the server in the database.
+]]--
+----------------------------
+
+alpha.settings.set ("server_id", 1)
+
+
+----------------------------
+--[[
 #Name: db_host
 #Description: the host of the database to use
 ]]--

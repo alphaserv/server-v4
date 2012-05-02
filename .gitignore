@@ -1,9 +1,9 @@
 .svn
-conf/core.lua
-conf/defaults.lua
+conf/*.lua
 log/*.log
 log/*.pid
 *_build
 serverexec
+core
 0
 1

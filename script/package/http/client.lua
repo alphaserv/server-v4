@@ -69,22 +69,15 @@ local function read_body(socket, headers, callback)
         return
     end
     
-<<<<<<< HEAD
-    local buffer = net.buffer(content_length)
-    
-    socket:async_read(buffer, function(error_message)
-=======
+
     socket:async_read(content_length, function(data, error_message)
->>>>>>> 7e614780869978484c07b584590af2ba1686f3bb
+
         if error_message then
             callback(nil, {socket_error = error_message})
             return
         end
-<<<<<<< HEAD
-        callback(buffer:to_string())
-=======
         callback(data)
->>>>>>> 7e614780869978484c07b584590af2ba1686f3bb
+
     end)
 end
 
@@ -111,11 +104,9 @@ local function read_chunked_body(socket, header, callback, body)
     socket:async_read_until("\r\n", function(line, error_message)
     
         if error_message then
-<<<<<<< HEAD
-            callback(nil,{socket_error = error_message})
-=======
+
             callback(nil, {socket_error = error_message})
->>>>>>> 7e614780869978484c07b584590af2ba1686f3bb
+
             return
         end
         
@@ -136,24 +127,16 @@ local function read_chunked_body(socket, header, callback, body)
             return
         end
         
-<<<<<<< HEAD
-        local buffer = net.buffer(chunk_size)
-        
-        socket:async_read(buffer, function(error_message)
-=======
         socket:async_read(chunk_size, function(chunk, error_message)
->>>>>>> 7e614780869978484c07b584590af2ba1686f3bb
+
         
             if error_message then
                 callback(nil,{socket_error = error_message})
                 return
             end
-            
-<<<<<<< HEAD
-            body = body .. buffer:to_string()
-=======
+
             body = body .. chunk
->>>>>>> 7e614780869978484c07b584590af2ba1686f3bb
+
             
             socket:async_read_until("\r\n", function(empty_line, error_message)
                 
@@ -186,23 +169,6 @@ function get(resource, callback, state)
     
     resource = url.parse(resource)
     
-<<<<<<< HEAD
-    if resource.scheme ~= "http" or not resource.host then
-        callback(nil,{http_error = "invalid url"})
-        return
-    end
-    
-    resource.path = resource.path or "/"
-    
-    local client = net.tcp_client()
-    
-    client:async_connect(resource.host, resource.port or 80, function(error_message)
-        
-        if error_message then
-            callback(nil, {socket_error = error_message})
-            return
-        end
-=======
     local support_ssl = net.ssl ~= nil
     
     local supported_protocol = {
@@ -237,7 +203,6 @@ function get(resource, callback, state)
     local port = resource.port or standard_port[resource.scheme]
     
     local function send_request()
->>>>>>> 7e614780869978484c07b584590af2ba1686f3bb
         
         local host_field = resource.host
         if resource.port then
@@ -308,9 +273,6 @@ function get(resource, callback, state)
                             headers = headers
                         })
                         
-<<<<<<< HEAD
-                        client:close()
-=======
                         if using_https then
                             client:async_shutdown(function(error_message)
                                 ssl_client_socket:close()
@@ -318,13 +280,11 @@ function get(resource, callback, state)
                         else
                             client:close()
                         end
->>>>>>> 7e614780869978484c07b584590af2ba1686f3bb
+
                     end)
                 end)
             end)
         end)
-<<<<<<< HEAD
-=======
     end
     
     client:async_connect(host, port, function(error_message)
@@ -348,7 +308,7 @@ function get(resource, callback, state)
         end
         
         send_request()
->>>>>>> 7e614780869978484c07b584590af2ba1686f3bb
+
     end)
 end
 
