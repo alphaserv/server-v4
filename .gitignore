@@ -1,5 +1,5 @@
 .svn
-conf/*.lua
+conf/*
 log/*.log
 log/*.pid
 *_build

@@ -1,39 +1,4 @@
---[[
-local package = {
-	dependics = {},
-	name = "",
-	description = "",
-}
-
-local host = {
-	url = "",
-	connection_type = "",
-	
-	list = {},
-	fetchlist = function(obj)
-		if connection_type == "http_get" then
-			local url = obj.connection_type:gsub("(\\?\\t)", "list") --?list=?n
-			url = url:gsub("(\\?\\n)", "list") --?list=list
-			
-			http.client.get(url, function(body, status)
-				
-				if not body then
-					error("failed to fetch package list from: "..url)
-				end
-				
-				local data = Json.Decode(body)
-				
-				for i, package in pairs(data.list) do
-				
-				end
-				
-				print("Updated package list from: "..url)
-        end
-    end)
-		end
-	end
-
-}]]
+local modules = alpha.settings.new_setting("modules", {"serverexec"}, "A list of modules to load.")
 
 module("alpha.package", package.seeall)
 
@@ -48,9 +13,10 @@ function loadpackage(name, version)
 	if loaded[string.format('%s_%s', name, version)] then
 		return true
 	end
+
+	print("~| Loading package: %(1)s, version: %(2)s" % { name, version })
 	
 	local info = dofile(string.format(package_path.."%s_%s/info.lua", name, version))
-	
 	
 	for _, dependic in pairs(info.dependics or {}) do
 		if type(dependic) == "string" then dependic = {name = dependic} end
@@ -73,3 +39,16 @@ function depend(name, version)
 		error("could not find dependic %(1)q version: %(2)q" % { name, version })
 	end
 end
+
+local event
+event = server.event_handler("config_loaded", function()
+	for i, module in pairs(modules:get()) do
+		if type(module) == "table" then
+			loadpackage(module.name, module.version)
+		else
+			loadpackage(module)
+		end			
+	end
+	server.cancel_event_signal("config_loaded")
+	event = nil
+end)

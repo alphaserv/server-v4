@@ -22,10 +22,11 @@ dofile('./script/alphaserv/utils/string.lua')
 dofile(alpha.module_prefix.."loader"..alpha.module_extention)
 
 local initmem = gcinfo()
-alpha.load.file("core/package")
 
 alpha.load.file("core/settings")
 alpha.load.file("core/general")
+
+alpha.load.file("core/package")
 
 alpha.load.file("core/user")
 
@@ -54,7 +55,7 @@ alpha.settings.write(
 alpha.load.file("conf/defaults.lua", true)
 alpha.load.file("conf/core.lua", true)
 
-exec("conf/server.conf")
+--exec("conf/server.conf")
 trigger_config()
 
 server.event_handler("started", function()
