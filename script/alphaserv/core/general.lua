@@ -1,5 +1,16 @@
+--[[!
+    File: script/alphaserv/core/general.lua
 
-alpha.settings.new_setting("servername", "Alphaserv1", "unique name of the server.")
+    About: Author
+        Killme
+
+    About: Copyright
+        Copyright (c) 2012 Alphaserv project
+
+    About: Purpose
+		This file contains a wrapper for hopmod's buildin settings and the server id.
+]]
+
 alpha.settings.new_setting("server_id", 1, "unique id of the server in the database.")
 
 --A small class for saving server vars with our config framework

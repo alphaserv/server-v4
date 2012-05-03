@@ -1,17 +1,75 @@
+--[[!
+    File: script/alphaserv/core/user.lua
+
+    About: Author
+        Killme
+
+    About: Copyright
+        Copyright (c) 2012 Alphaserv project
+
+    About: Purpose
+		This file manages user objects which are used to store user-data as an object.
+
+    Package: alpha.user
+]]
+
 module("alpha.user", package.seeall)
 
 users = {}
 
+
+--[[!
+	Class: user_obj
+	The object that represents the user
+	
+	Note:
+		this class may be partially overridden by modules
+]]
+
 user_obj = class.new(nil, {
+	--[[!
+		Property: sid
+		The session id of the user, checked to see if the user is still connected
+	]]
 	sid = "",
+	
+	--[[!
+		Property: cn
+		The channel of the user
+	]]
 	cn = -1,
+	
+	--[[!
+		Property: user_id
+		The id of the authenticated user in the database, -1 if not authenticated
+	]]
 	user_id = -1,
 	
+	--[[
+		Function: init
+		initializes the user
+		
+		Parameters:
+			self -
+			cn - the channel of the user
+	]]
 	__init = function(self, cn)
 		self.sid = server.player_sessionid(cn)
 		self.cn = cn
 	end,
-	
+
+	--[[
+		Function: check
+		Checks if the user is still connected
+		
+		Parameters:
+			self -
+
+		Return:
+			true - When still connected
+			false - Other cases
+	]]
+		
 	check = function(self)
 		if self.sid ~= server.player_sessionid(self.cn) then
 			return false
@@ -20,22 +78,51 @@ user_obj = class.new(nil, {
 		return true
 	end,
 	
+	--[[
+		Function: auth
+		Authenticate the user and set the <user_id>.
+		
+		Parameters:
+			self -
+			user_id - the user id
+	]]
+	
 	auth = function(self, user_id)
 		self.user_id = user_id
 	end,
 	
+	--[[
+		Function: has_permission
+		Check if the user has the permission to execute a specific action
+		
+		Parameters:
+			self -
+			... - ?
+
+		Return:
+			true - Has access
+			false - Deny
+	]]
 	has_permission = function(self)
 		return true
 	end,
 	
-	disconnect = function(self)
+	--[[
+		Function: OnDisconnect
+		Called when the user disconnects
+		
+		Parameters:
+			self -
+	]]
+	
+	OnDisconnect = function(self)
 		server.player_msg(self.cn, "bb")
 	end,	
 	
 	--default stuff
 	msg = function(self, text) return server.player_msg(self.cn, text) end,
     kick            = function(self, ...) return server.kick(self.cn, unpack(arg)) end,
-    execute_disconnect      = function(self, ...) return server.disconnect(self.cn, unpack(arg)) end,
+    disconnect      = function(self, ...) return server.disconnect(self.cn, unpack(arg)) end,
     name            = function(self) return server.player_name(self.cn) end,
     displayname     = function(self) return server.player_displayname(self.cn) end,
     team            = function(self) return server.player_team(self.cn) end,
@@ -83,18 +170,48 @@ user_obj = class.new(nil, {
     pos             = function(self) return server.player_pos(self.cn) end,
 })
 
+--[[!
+	Section: alpha.user
+]]
+
 _G.user_obj = user_obj
 
 events = {}
+
+--[[!
+	Function: new_user
+	Creates a new user
+		
+	Parameters:
+		... - arguments to pass to the object __init function
+
+	Return:
+		The created object
+	
+	Note:
+		Deprecated
+]]
 
 function new_user(...)
 	return user_obj(...)
 end
 
+--[[!
+	Function: _G.user_from_cn
+	Find an user from a cn
+		
+	Parameters:
+		cn - The cn to search for
+
+	Return:
+		the object
+]]
+
 function _G.user_from_cn(cn)
 	return users[cn] or error("cannot fin player from cn "..cn.." table: "..table_to_string(users))
 end
 
+--[[
 function get_cn_from_sid(session_id)
 	for i, cn in pairs(players.all) do
 		if session_id == server.player_sessionid(cn) then
@@ -103,7 +220,15 @@ function get_cn_from_sid(session_id)
 	end
 	
 	return -1
-end
+end]]
+
+--[[!
+	Function: OnConnect
+	Connect event handler, creates an user instance and inserts it into the users table
+		
+	Parameters:
+		cn - The cn of the player connecting
+]]
 
 function OnConnect(cn)
 	users[cn] = user_obj(cn)
@@ -111,9 +236,17 @@ function OnConnect(cn)
 	--print("connect, table is now: "..table_to_string(users, true, true).." (added: "..table_to_string(users[cn], true, true)..")")
 end
 
+--[[!
+	Function: OnDisconnect
+	Executes the OnDisconnect event handler and removes the user from the table
+		
+	Parameters:
+		cn - The cn of the player disconnecting
+]]
+
 function OnDisconnect(cn)
 	--print("%(1)i disconnected" % {cn})
-	users[cn]:disconnect()
+	users[cn]:OnDisconnect()
 	users[cn] = nil
 end
 
@@ -121,9 +254,7 @@ end
 server.event_handler("connect", OnConnect)
 server.event_handler("disconnect", OnDisconnect)
 
-function init()
-
-end
+--[[ TODO: Fix&optimalize or depricate ]]
 
 search_obj = class.new(nil, {
 	users = {},
@@ -395,4 +526,3 @@ function _G.all_obj_user()
 	return list_obj(users)
 end
 
-init()

@@ -1,9 +1,38 @@
+--[[!
+    File: script/alphaserv/core/package.lua
+
+    About: Author
+        Killme
+
+    About: Copyright
+        Copyright (c) 2012 Alphaserv project
+
+    About: Purpose
+		This file handles loading of modules and their dependics.
+
+    About: Settings
+    	modules - A list of modules to load, these are loaded on the "config_loaded" event.
+
+    Section: Alphaserv Core
+    
+	Package: alpha.package
+]]
+
 local modules = alpha.settings.new_setting("modules", {"serverexec", "logging"}, "A list of modules to load.")
 
 module("alpha.package", package.seeall)
 
 local loaded = {}
 local package_path = alpha.module_prefix.."packages/"
+
+--[[!
+    Function: loadpackage
+    Closes one specific file
+
+    Parameters:
+        name - The Package name.
+        version - The version of the package, defaults to latest (L).
+]]
 
 function loadpackage(name, version)
 	if not version or version == nil then
@@ -33,6 +62,15 @@ function loadpackage(name, version)
 	
 	return true
 end
+
+--[[!
+    Function: depend
+    Internally used to recursively load dependics
+
+    Parameters:
+        name - The Package name.
+        version - The version of the package, defaults to latest (L).
+]]
 
 function depend(name, version)
 	if not loadpackage(name) and false then
