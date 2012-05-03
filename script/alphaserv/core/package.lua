@@ -1,4 +1,4 @@
-local modules = alpha.settings.new_setting("modules", {"serverexec"}, "A list of modules to load.")
+local modules = alpha.settings.new_setting("modules", {"serverexec", "logging"}, "A list of modules to load.")
 
 module("alpha.package", package.seeall)
 

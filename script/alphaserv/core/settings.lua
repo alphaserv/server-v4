@@ -51,7 +51,7 @@ writers = {
 			
 			string = string	.. serialize_data(v, level + 1)
 			
-			string = string .. "\n"
+			string = string .. ",\n"
 		end
 		
 		string = string .. writetabs(level) .. "}"
@@ -153,10 +153,6 @@ function new_setting(name, value, description, type)
 	
 	return settings[name]
 end
-
---function init_setting(name, default_value, type, description)
---	new_setting(name, default_value, description)
---end
 
 function get(name)
 	if not settings[name] then

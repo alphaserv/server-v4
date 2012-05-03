@@ -38,22 +38,12 @@ alpha.load.file("core/logging")
 alpha.load.file("core/auth/core")
 
 --generate default config if file not found
-if not server.file_exists("conf/core.lua") then
-	alpha.settings.write("conf/core.lua")
+if server.file_exists("conf/core.lua") then
+	alpha.load.file("conf/core.lua", true)
 end
 
-alpha.settings.write(
-	"conf/defaults.lua",
-	"-----------------------------\n"..
-	"--[[\n"..
-	"	Default settings\n"..
-	"	Do NOT change,\n"..
-	"	they will be overwritten anyway.\n"..
-	"]]--\n"..
-	"-----------------------------\n\n")--generate default config
-
-alpha.load.file("conf/defaults.lua", true)
-alpha.load.file("conf/core.lua", true)
+--force proper configuration scheme
+alpha.settings.write("conf/core.lua")
 
 --exec("conf/server.conf")
 trigger_config()
