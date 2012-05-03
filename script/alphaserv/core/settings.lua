@@ -164,7 +164,8 @@ end
 
 function set(name, value)
 	if not settings[name] then
-		error("Could not find setting %(1)s" % {name}, 2)
+		log_msg(LOG_ERROR, "Could not find setting %(1)s" % {name}, 2)
+		return
 	end
 	settings[name]:set(value)
 end

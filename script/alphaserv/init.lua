@@ -23,15 +23,14 @@ dofile(alpha.module_prefix.."loader"..alpha.module_extention)
 
 local initmem = gcinfo()
 
+alpha.load.file("core/logging")
+
 alpha.load.file("core/settings")
 alpha.load.file("core/general")
 
 alpha.load.file("core/package")
 
 alpha.load.file("core/user")
-
-alpha.load.file("core/db")
-alpha.load.file("core/logging")
 
 --alpha.load.file("wcp_connection", "core/wcp_connection", "connection with web control panel")
 

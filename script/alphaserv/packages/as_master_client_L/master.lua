@@ -146,6 +146,10 @@ function read()
 			for i, ip in pairs(list) do
 				call_handler("add_ban", ip)
 			end
+			
+		--map
+		elseif command == "mapinfo" then --mapinfo %(mapname)q %(crc)q %(has_bases)i %(has_flags)i %(motd)q
+			--TODO
 		else
 			error("master sent unkown reply: "..line)
 		end

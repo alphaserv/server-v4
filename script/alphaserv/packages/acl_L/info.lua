@@ -1,7 +1,11 @@
 
 return {
 	name = "access control list (dummy)",
-	dependics = {},
-	load = {}
+	dependics = {
+		'database'
+	},
+	load = {
+		'acl.lua'
+	}
 }
 	

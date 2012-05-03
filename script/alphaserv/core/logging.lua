@@ -76,12 +76,15 @@ alpha.log.debuglevel_names = {
 alpha.log.debuglevel = alpha.log.debuglevels.INFO
 
 function alpha.log.debug(level, text)
---	if level <= alpha.log.debuglevel then
+	if level <= alpha.log.debuglevel then
 		local name = alpha.log.debuglevel_names[level]
-		alpha.log.message_to("DEBUG %s(%i): %s", "debug", name, level, text)
+		local msg = alpha.log.message_to("DEBUG %s(%i): %s", "debug", name, level, text)
 		
 		if not alpha.init_done and alpha.spamstartup then
-			print(string.format("DEBUG %s(%i): %s", "debug", name, level, text))
+			print(msg)
+		
+		elseif level == alpha.log.debuglevels.ERROR then
+			print("ERROR: "..msg)
 		
 		--message module loaded
 		elseif alpha.init_done and messages.load then
@@ -90,7 +93,11 @@ function alpha.log.debug(level, text)
 				:send(server.players(), false)
 
 		end
---	end
+		
+		if level == alpha.log.debuglevels.FATAL then
+			error(msg)
+		end
+	end
 end
 
 _G.log_msg = alpha.log.debug
