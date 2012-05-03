@@ -72,8 +72,5 @@ local function on_started ()
 	end
 end
 
-if not alpha.standalone then
-	server.event_handler("started", on_started)
-else
-	event.event("started"):add_listner(on_started)
-end
+server.event_handler("started", on_started)
+

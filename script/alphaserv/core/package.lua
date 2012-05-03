@@ -18,7 +18,12 @@
 	Package: alpha.package
 ]]
 
-local modules = alpha.settings.new_setting("modules", {"serverexec", "logging"}, "A list of modules to load.")
+local modules
+if not alpha.standalone then
+	modules = alpha.settings.new_setting("modules", {"serverexec", "logging"}, "A list of modules to load.")
+else
+	modules = alpha.settings.new_setting("modules", {"irc", "quote", "serverexec"}, "A list of modules to load.")
+end
 
 module("alpha.package", package.seeall)
 

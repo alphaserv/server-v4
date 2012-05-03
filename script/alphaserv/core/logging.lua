@@ -13,7 +13,7 @@
     Package: alpha.log
 ]]
 
-module("alpha.log")
+module("alpha.log", package.seeall)
 
 printlogs = false
 openedfiles = {}

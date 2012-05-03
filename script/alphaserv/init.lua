@@ -15,7 +15,7 @@ else
 end
 
 alpha.module_prefix = "script/alphaserv/" --path to this directory
-alpha.module_extention = ".lua" ----extention of the files
+alpha.module_extention = ".lua" ----extention of the files, deprecated
 
 dofile('./script/alphaserv/utils.lua')
 dofile('./script/alphaserv/utils/string.lua')
