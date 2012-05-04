@@ -48,14 +48,14 @@ function loadpackage(name, version)
 		return true
 	end
 
-	print("~| Loading package: %(1)s, version: %(2)s" % { name, version })
-	
 	local info = dofile(string.format(package_path.."%s_%s/info.lua", name, version))
 	
 	for _, dependic in pairs(info.dependics or {}) do
 		if type(dependic) == "string" then dependic = {name = dependic} end
 		depend(dependic.name, dependic.version or "")
 	end
+
+	print("~| Loading package: %(1)s, version: %(2)s" % { name, version })
 	
 	local_package_path = string.format("%s%s_%s/", package_path, name, version)
 	

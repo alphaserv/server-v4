@@ -1,9 +1,12 @@
 
 module("messages", package.seeall)
 
+local you_replacing = alpha.settings.new_setting("You_replacing", true, "Replace the name of a player with you")
+
 message_object = class.new(nil, {
 	message_string = "",
 	message_type = "info",
+	use_irc = false,
 	
 	message_name = "",
 	module_name = "",
@@ -12,6 +15,7 @@ message_object = class.new(nil, {
 		self.name = data.name
 		self.module_name = data.module
 		self.message_string = data.message
+		self.use_irc = data.use_irc and true
 		
 		return self
 	end,
@@ -102,7 +106,7 @@ message_object = class.new(nil, {
 		msg = string.gsub(msg, "grey<(.-)>", function (string) return color.grey(string) end)
 		
 		msg = string.gsub(msg, "name<(.-)>(.-)|(.-)|(.-)|", function(cn, seperator, you_text, name_text)
-			if tonumber(cn) == to and alpha.settings:get("you_replacing") then
+			if tonumber(cn) == to and you_replacing:get() then
 				return "name<"..cn..">"..seperator..you_text
 			else
 				return "name<"..cn..">"..seperator..name_text
@@ -110,7 +114,7 @@ message_object = class.new(nil, {
 		end)
 
 		msg = string.gsub(msg, "name<(.-)>", function(cn)
-			if tonumber(cn) == to and alpha.settings:get("you_replacing") then
+			if tonumber(cn) == to and you_Replacing:get() then
 				return "you"
 			elseif server.valid_cn(cn) then
 				return server.player_displayname(cn)
@@ -138,6 +142,10 @@ message_object = class.new(nil, {
 		
 		for _, cn in pairs(to) do
 			server.player_msg(cn, self:color(cn, is_private))
+		end
+		
+		if self.use_irc and irc and irc.send then
+			irc.send(self.message_string)
 		end
 		
 		return self

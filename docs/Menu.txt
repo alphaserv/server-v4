@@ -72,6 +72,9 @@ Group: Script  {
 
    }  # Group: Script
 
+File: chan_obj.lua  (alphaserv/packages/irc_L/chan_obj.lua)
+File: network_obj.lua  (alphaserv/packages/irc_L/network_obj.lua)
+
 Group: Index  {
 
    Index: Everything

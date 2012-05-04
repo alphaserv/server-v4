@@ -171,7 +171,8 @@ server.event_handler("shutdown", close_all)
 	FATAL - Unrecoverable error
 	ERROR - Unexpected behaviour that should not happen
 	NOTICE - Errors that may cause bugs but can usally be ignored
-	INFO - Messages that are usefull when debugging
+	INFO - Informative messages
+	DEBG - Messages that are usefull when debugging
 ]]
 
 debuglevels = {
@@ -179,6 +180,7 @@ debuglevels = {
 	ERROR = 1,
 	NOTICE = 2,
 	INFO = 3,
+	DEBUG = 4
 }
 
 for i, level in pairs(debuglevels) do
@@ -190,9 +192,10 @@ debuglevel_names = {
 	[debuglevels.ERROR] = "error",
 	[debuglevels.NOTICE] = "notice",
 	[debuglevels.INFO] = "info",
+	[debuglevels.DEBUG] = "debug",
 }
 
-debuglevel = debuglevels.INFO
+debuglevel = debuglevels.DEBUG
 
 --[[!
     Function: debug
@@ -207,6 +210,7 @@ debuglevel = debuglevels.INFO
     	- LOG_ERROR
     	- LOG_NOTICE
     	- LOG_INFO
+    	- LOG_DEBUG
     
     Note:
     	This function is also available in the global scope named "log_msg"
@@ -221,7 +225,7 @@ function debug(level, text)
 			print(msg)
 		
 		elseif level == debuglevels.ERROR then
-			print("ERROR: "..msg)
+			print("ERROR: "..text)
 		
 		--message module loaded
 		elseif alpha.init_done and messages.load then
@@ -229,6 +233,11 @@ function debug(level, text)
 				:format(name, level, text)
 				:send(server.players(), false)
 
+		end
+
+	
+		if irc and irc.send then
+			irc.send(text)
 		end
 		
 		if level == debuglevels.FATAL then
@@ -257,8 +266,8 @@ _G.log_msg = debug
      (end)
 ]]
 
-function alpha.log_event(a, name, ...)
-	local returning = "Event "..name
+function _G.alpha.log_event(a, event_name, ...)
+	local returning = "Event "..event_name
 	local i = 1
 	for i = 1, #a do
 		local b = a:sub(i,i)
@@ -271,7 +280,7 @@ function alpha.log_event(a, name, ...)
 		end					
 		i = i + 1
 	end
-	message(returning)
+	debug(debuglevels.INFO, returning)
 end
 
 if server.reloaded then

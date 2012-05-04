@@ -75,6 +75,7 @@ function get_command(name)
 end
 
 function execute_command(player, name, ...)
+
 	local command = get_command(name)
 	
 	if not command then
@@ -195,7 +196,7 @@ command_from_table("enable_command", {
 			res[i] = tostring(row)
 		end
 		
-		return true, {"result: ", unpack(res)}
+		return true, {"Command green<enabled>", "result: ", unpack(res)}
 	end,
 })
 
@@ -222,7 +223,7 @@ command_from_table("disable_command", {
 			res[i] = tostring(row)
 		end
 		
-		return true, {"result: ", unpack(res)}
+		return true, {"Command green<disabled>", "result: ", unpack(res)}
 	end,
 })
 
