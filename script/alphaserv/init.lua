@@ -47,10 +47,10 @@ if server.file_exists("conf/core.lua") then
 	alpha.load.file("conf/core.lua", true)
 end
 
+trigger_config()
+
 --force proper configuration scheme
 alpha.settings.write("conf/core.lua")
-
-trigger_config()
 
 server.event_handler("started", function()
 	local mem = gcinfo()
