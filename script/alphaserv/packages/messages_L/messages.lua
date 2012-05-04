@@ -6,6 +6,7 @@ local you_replacing = alpha.settings.new_setting("You_replacing", true, "Replace
 message_object = class.new(nil, {
 	message_string = "",
 	message_type = "info",
+	formated_message = false
 	use_irc = false,
 	
 	message_name = "",
@@ -76,7 +77,7 @@ message_object = class.new(nil, {
 		 
 	
 	format = function(self, ...)
-		self.message_string = self.message_string % self:escape(arg)
+		self.formated_message = self.message_string % self:escape(arg)
 		
 		return self
 	end,
@@ -92,7 +93,7 @@ message_object = class.new(nil, {
 	end,
 	
 	color = function(self, to, is_private)
-		local msg = self.message_string
+		local msg = self.formated_message or self.message_string
 		
 		msg = self:prefix(msg)
 		
@@ -145,7 +146,7 @@ message_object = class.new(nil, {
 		end
 		
 		if self.use_irc and irc and irc.send then
-			irc.send(self.message_string)
+			irc.send(self.formated_message or self.message_string)
 		end
 		
 		return self
