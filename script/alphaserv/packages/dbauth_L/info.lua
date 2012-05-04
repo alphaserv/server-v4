@@ -4,7 +4,8 @@ return {
 	dependics = {
 		"messages",
 		"auth",
-		"database"
+		"database",
+		"spec_control"
 	},
 	load = {
 		"dbauth.lua"

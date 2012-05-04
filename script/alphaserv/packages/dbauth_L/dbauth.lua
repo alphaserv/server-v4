@@ -56,6 +56,55 @@ auth_obj = class.new(auth.auth_object, {
 			return false
 		end
 	end,
+	
+	_lock = function(self, user, namereserved, clanreserved)
+		reserved_lock = class.new(spectator.lock.lock_obj, {
+			is_locked = function(_, user)
+				local name, row = self:_getname(user:name())
+				
+				if name == true and row.id == user.user_id then
+					return false
+				elseif name == true then
+					return true
+				else
+					return false
+				end
+			end,
+	
+			try_unspec = function(self, player)
+				return self:is_locked()
+			end,
+	
+			unlock = function(self, player)
+				server.msg(player:name().." authed!")
+			end
+		})
+
+		if namereserved then
+			user:add_speclock("protect:name", reserved_lock())
+		end
+		
+		if clanreserved then
+			user:add_speclock("protect:clantag", reserved_lock())
+		end
+	end,
+	
+	reserved_name = function(self, user)
+		local namereserved = self:namereserved(user:name())
+		local clanreserved = self:clanreserved(user:name())
+		if namereserved or clanreserved then
+			self:_lock(user, namereserved, clanreserved)
+			return true, true, {"You are using a reserved name / clantag, please rename or authenticate"}
+		end
+	end,
+	
+	logout = function(self, user)
+		if user.authedwith and user.authedwith == "dbauth" then
+			self:reserved_name(user)
+		else
+			return false
+		end		
+	end,
 
 	auth = function(self, user, hash)
 	
@@ -81,6 +130,7 @@ auth_obj = class.new(auth.auth_object, {
 		row = row[1]
 		
 		if user:comparepassword(hash, row.pass) then
+			user.authedwith = "dbauth"
 			user:auth(row.id)
 		
 			--spectator lock enabled

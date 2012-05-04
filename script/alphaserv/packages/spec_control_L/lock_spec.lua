@@ -75,7 +75,7 @@ user_obj.check_locks = function(self, way)
 	local i = 0
 	for j, lock in pairs(self.locks) do
 		if not lock:is_locked(self) then
-			self.locks[j] = nil
+			table.remove(self.locks, j)
 		else
 			i = i + 1
 		end
@@ -84,7 +84,7 @@ user_obj.check_locks = function(self, way)
 	server.msg("locks: "..i)
 	
 	if i ~= 0 and way == "0" then
-		server.msg("blocked (un)spec")
+		log_msg(LOG_DEBUG,"blocked (un)spec")
 		self:spec()
 	end
 end

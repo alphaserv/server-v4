@@ -83,7 +83,7 @@ if not alpha.standalone then
 	
 		local result, messages = checkall("auth", user, password)
 			
-		log_msg(LOG_INFO, "%(1)s (%(2)i) tried to auth (result=%(3)i)" % { server.player_name(user.cn), user.cn, tonumber(result or 0) })
+		log_msg(LOG_INFO, "%(1)s (%(2)i) tried to auth (result=%(3)i)" % { server.player_name(user.cn), user.cn, tonumber(result or 0)or 0 })
 			
 		if result then
 			--TODO: use message framework
@@ -98,35 +98,12 @@ if not alpha.standalone then
 		end
 	end)
 	
-	server.event_handler("connecting", function(cn, host, name, hash, reserved_slot)
-		if hash == "" then return end
+	server.event_handler("connect", function(cn)
 		local user = user_from_cn(cn)
 		
-		local result, messages = checkall("auth", user, password)
-			
-		log_msg(LOG_INFO, "%(1)s (%(2)i) tried to auth (result=%(3)i)" % { server.player_name(user.cn), user.cn, tonumber(result) })
-			
-		if result then
-			--TODO: use message framework
-			server.player_msg(player.cn, "authed")
-			user:check_locks()
-		else
-			server.player_msg(player.cn, "could not log you in")
-		end
-			
-		for i, msg in pairs(messages) do
-			server.player_msg(player.cn, messages)
-		end
-	end)
-	
-	server.event_handler("mapload", function(cn)
-		local user = user_from_cn(cn)
-		
-		if not user.NP_mapload then --only  check 1 time per user
+		server.sleep(1000, function()
 			checkall("reserved_name", user)
-		end
-		
-		user.NP_mapload = true
+		end)
 	end)
 	
 	server.event_handler("rename", function(cn)
