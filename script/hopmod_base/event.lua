@@ -53,7 +53,11 @@ local function trigger_event(event_id, ...)
         if not pcall_status then
         	--alphaserv tweak:
         	if type(result) == "table" then result = result[1].. table.concat(table, ", ")..tostring(table) end
-            server.log_event_error(event_id, result or "unknown error")
+        	if server.log_event_error then
+        		server.log_event_error(event_id, result or "unknown error")
+        	else
+        		print("[ERROR on "..event_id.."] "..result or "unkown error")
+        	end
         else
             prevent_default = prevent_default or (result == true)
         end

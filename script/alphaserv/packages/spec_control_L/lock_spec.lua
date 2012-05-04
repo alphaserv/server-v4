@@ -53,6 +53,7 @@ user_obj.add_speclock = function(self, module, lock)
 	self.locks[module] = lock
 	
 	if not self:is_spectator() then
+		self.was_speced_by_us = true
 		self:spec()
 	end
 end
@@ -71,27 +72,28 @@ end
 
 user_obj.check_locks = function(self, way)
 
-	log_msg(LOG_INFO, "Checking locks for player %(1)s" % {self.cn})
-	local i = 0
-	for j, lock in pairs(self.locks) do
+	for j, lock in ipairs(self.locks) do
 		if not lock:is_locked(self) then
 			table.remove(self.locks, j)
-		else
-			i = i + 1
 		end
 	end
 	
-	server.msg("locks: "..i)
+	server.msg("locks: "..#self.locks)
 	
-	if i ~= 0 and way == "0" then
+	if #self.locks ~= 0 and way == "0" then
 		log_msg(LOG_DEBUG,"blocked (un)spec")
 		self:spec()
+	elseif self.was_speced_by_us and not self:is_locked() then
+		self.was_speced_by_us = false
+		server.sleep(500, function()
+			self:unspec()
+		end)
 	end
 end
 
-events = { spec = nil }
+--events = { spec = nil }
 
-events.spec = server.event_handler("spectator", function(cn, way)
+--[[events.spec =]] server.event_handler("spectator", function(cn, way)
 	
 	way = tostring(way)
 	local user = user_from_cn(cn)

@@ -1,5 +1,5 @@
 require "net"
-
+require "Json"
 module("as_master.client", package.seeall)
 
 handlers = {}
@@ -7,7 +7,7 @@ handlers = {}
 
 local function call_handler(name, ...)
 	if handlers[name] then
-		local res, error_msg = pcall(handlers[name], ...)
+		local res, error_msg = native_pcall(handlers[name], ...)
 		
 		if not res then
 			log_msg(LOG_WARNING, 'error on "'..name..'" :'..error_msg)
@@ -20,7 +20,7 @@ end
 local enabled = alpha.settings.new_setting("as_register_server", true, "enable alphaserv master registration")
 local host = alpha.settings.new_setting("as_master_server", "localhost", "The masterserver to use.")
 local port = alpha.settings.new_setting("as_master_server_port", 28787, "The masterserver port to use.")
-local key = alpha.settings.new_setting("as_master_key", "AAAAAAAAA", "The key of our server.")
+key = alpha.settings.new_setting("as_master_key", "AAAAAAAAA", "The key of our server.")
 
 local client
 
@@ -56,15 +56,20 @@ end
 function start_reading()
 	print("[AS Master client] Starting reading operations")
 	
-	local _, errormsg = pcall(read)
+	read()
 	
 	if not connection then
 		print("[AS Master client] Stoping read operations, fatal error closed the socket.")
+		--print("[AS Master client] Error: ", a, errormsg)
 	else
-		print("[AS Master client] Error: "..errormsg)
+		--print("[AS Master client] Error: "..errormsg)
 	
 		start_reading()
 	end
+end
+
+function send_message(msg)
+	client:async_send(msg.."\n", function() end)
 end
 
 function read()
@@ -73,7 +78,9 @@ function read()
 			error("could not register server, "..error_message or "unable to read reply")
 			return
 		end
-				
+		
+		print("read", line)
+			
 		local command, ee = line:match("^([^ ]+)(.*)\n")
 			
 		--registration on list	
@@ -87,14 +94,14 @@ function read()
 			local sess_id = ee:match("([0-9]+)")
 			call_handler("auth", false, sess_id)
 		
-		elseif command == "login_success" then --login_success %(session_id)i %(session_key)q %(json(info))q
-			local sess_id, session_key, extinfo = ee:match("([0-9]-) \"([^\"]-)\" \"([^\"]-)")
-			call_handler("auth", true, sess_id, session_key, json.decode(extinfo))
+		elseif command == "login_success" then --login_success %(session_id)i %(session_key)q %(Json(info))q
+			local sess_id, session_key, extinfo = ee:match("^([0-9]-) (.-)")
+			call_handler("auth", true, sess_id, session_key, {})
 		
 		
 		--stats
 		--return stats requested bt player
-		elseif command == "stats" then  -- stats %(session_key)i %(json(stats))q
+		elseif command == "stats" then  -- stats %(session_key)i %(Json(stats))q
 		
 		--cross server chat
 		elseif command == "pm" then -- pm %(session_key)q %(message)q
@@ -108,8 +115,8 @@ function read()
 			local name = ee:match("\"([^\"]-)\"")
 			call_handler("add_name", name)
 			
-		elseif command == "namelist" then --namelist %(json(name_array))s
-			local list = json.decode(ee)
+		elseif command == "namelist" then --namelist %(Json(name_array))s
+			local list = Json.Decode(ee)
 			for i, name in pairs(list) do
 				call_handler("add_name", name)
 			end
@@ -118,15 +125,15 @@ function read()
 			local tag = ee:match("\"([^\"]-)\"")
 			call_handler("add_clantag", tag)
 		
-		elseif command == "clanlist" then--clanlist %(json(clantag_array))s
-			local list = json.decode(ee)
+		elseif command == "clanlist" then--clanlist %(Json(clantag_array))s
+			local list = Json.Decode(ee)
 			for i, tag in pairs(list) do
-				call_handler("add_clan", tag)
+				call_handler("add_clantag", tag)
 			end		
 		
 		--server verification
 		elseif command == "req_serverauth" then
-			client:async_send("serverauth %(1)q" % { key:get() })
+			client:async_send("serverauth %(1)q" % { key:get() }, function() end)
 
 		elseif command == "serverauth_success" then
 			print("Successfully connected and authenticated to alphaserv master server")
@@ -142,7 +149,7 @@ function read()
 			call_handler("add_ban", ip)
 				
 		elseif command == "banlist" then
-			local list = json.decode(ee)
+			local list = Json.Decode(ee)
 			for i, ip in pairs(list) do
 				call_handler("add_ban", ip)
 			end

@@ -44,7 +44,7 @@ function checkall(name, ...)
 		end
 	end
 	
-	error("could not find any module")
+	error("could not find any module for "..name)
 end
 
 function checkaclall(name, ...)
@@ -72,18 +72,18 @@ if not alpha.standalone then
 		log_msg(LOG_INFO, "Setmaster event: " % { cn, password, set })			
 
 		if set == 0 then
-			log_msg(LOG_INFO, "%(1)s (%(2)i) tried to logout" % { server.player_name(user.cn), user.cn })			
+			log_msg(LOG_INFO, "%(1)s (%(2)i) tried to logout" % { user:name(), user.cn })			
 			
 			checkall("auth", user, password)
 			return
 		elseif set == 1 then
-			log_msg(LOG_INFO, "%(1)s (%(2)i) tried to claim master" % { server.player_name(user.cn), user.cn })
+			log_msg(LOG_INFO, "%(1)s (%(2)i) tried to claim master" % { user:name(), user.cn })
 			return
 		end
 	
 		local result, messages = checkall("auth", user, password)
 			
-		log_msg(LOG_INFO, "%(1)s (%(2)i) tried to auth (result=%(3)i)" % { server.player_name(user.cn), user.cn, tonumber(result or 0)or 0 })
+		log_msg(LOG_INFO, "%(1)s (%(2)i) tried to auth (result=%(3)i)" % { user:name(), user.cn, tonumber(result or 0)or 0 })
 			
 		if result then
 			--TODO: use message framework
@@ -107,11 +107,8 @@ if not alpha.standalone then
 	end)
 	
 	server.event_handler("rename", function(cn)
-		checkall("reserved_name", user_from_cn(cn))
+		local user = user_from_cn(cn)
+		user:check_locks()
+		checkall("reserved_name", user)
 	end)
-	
-	
-	admin_pass_auth = class.new(auth_object, {
-	
-	})
 end

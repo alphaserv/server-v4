@@ -1,182 +1,205 @@
---[[
--- old
-require "net"
-require "cubescript"
 
-master = {}
-master.servers = {}
+module("master.server", package.seeall)
+require "Json"
+--server authentication keys
 
-function server.addserver(ip, port)
---	master.servers[ip..':'..port] = { ['ip'] = ip, ['port'] = port }
---	debug.write(-1, string.format('adding server (ip=%q, port=%q)', ip, port))
-end
+local server_secrets = alpha.settings.new_setting("server_secrets", {AAAAAAAAA = true}, "The secrets of the servers")
 
---//client//--
-function master.close_client_connection(client, callback, error_message)
-    client:close()
-    if error_message then
-    	debug.write(1, "master client error: "..tostring(error_message))
-    end
-    callback(error_message)
-end
-
-function master.register_server(hostname, port, gameport, callback)
-
-    local client = net.tcp_client()
-    
-    if #server.serverip > 0 then
-        client:bind(server.serverip, 0)
-    end
-    
-    client:async_connect(hostname, port, function(error_message)
-        
-        if error_message then
-            master.close_client_connection(client, callback, error_message)
-            return
-        end
-
-        client:async_send(string.format("list\n", gameport), function(error_message)
-        	local function readrow()
-        		client:async_read_until("\n", function(data)
-        			
-        			if data then
-        				print(string.format("data: %q", data))
-        				data:gsub("\r", "")
-        				data:gsub("\\r", "")
-        				data:gsub("\n", "")
-        				data:gsub("\\n", "")
-        				data:gsub("\\", "")
-        				print(string.format("data2: %q", data))
---        				assert(cubescript.eval_string(data)) --unsafe? yes, a bit
-		    			if string.match(data ,"addserver (.*?) (.*?)") then
-		    				local ip, port = string.match(data ,"addserver (.*?) (.*?)")
-		    				master.servers[ip..':'..port] = { ['ip'] = ip, ['port'] = port }
-		    				debug.write(-1, string.format('adding server (ip=%q, port=%q)', ip, port))
-		    			else
-		    				debug.write(1, string.format("error in addserver line(line=%q, i=none)", data))
-		    			end
-        				print('reading row')
-        				readrow()
-        			else
-        				
-					end
-				end)
-			end
-			readrow()
-        end)
-
-    	client:async_send(string.format("regserv %i\n", gameport), function(error_message)
-            
-            if error_message then
-                master.close_client_connection(client, callback, error_message)
-                return
-            end
-            
-            client:async_read_until("\n", function(line, error_message)
-                
-                if not line then
-                    master.close_client_connection(client, callback, error_message or "failed to read reply from server")
-                    return
-                end
-                
-                local command, reason = line:match("([^ ]+)([ \n]*.*)\n")
-                
-                if command == "succreg" then
-                    master.close_client_connection(client, callback)
-                elseif command == "failreg" then
-                    master.close_client_connection(client, callback, reason or "master server rejected registration")
-                else
-                    master.close_client_connection(client, callback, "master server sent unknown reply: "..line)
-                end
-            end)
-        end)
-    end)
-end
-function master.clientloop()
-	if tonumber(config.get("master:client:updatemaster")) == 1 then
-		debug.write(-1, "registering server")
-		master.register_server(config.get("masterserver_host"), config.get("masterserver_port"), server.serverport, function(error_message)
-        		if error_message then
-                		log.write(("Master server error: " .. error_message), "error")
-            		else
-            			print("Server registration succeeded.")
-            		end
-		end)
-	end
-	server.sleep(tonumber(config.get("master:client:timeout")), master.clientloop)
-end
-server.sleep(1000, function()
-	master.clientloop()
-end)
---TODO: making masterserver
---//server//--
-
-sauermaster = {}
-
-function master:handleError(errmsg, retry)
-    if not errmsg then return end
-	print('Error :'..errmsg)
-end
-
-function print_debug(...) print(unpack(arg)) end
-
-master.server_client, errors = net.tcp_acceptor("0.0.0.0", 10000)-- socket
-if not master.server_client then error(errors) end
-
--- Send a response to the client
-function sendmsg(msg)
-    print_debug("[Output] : " .. msg)
-    if not allow_stream then return end
-    masterserver:async_send(msg .. "\n", function(success) end)
-end
-
--- Accept client connection and read data sent
-local function accept_next(master_server)
-	master_server:async_accept(function(server)
-		masterserver = server
+server_obj = class.new(nil, {
+	server = nil,
+	
+	__init = function(self, ip, port)
+		self.server, error_ = net.tcp_acceptor(ip, port)
 		
-		function read_data(server)
-			server:async_read_until("\n", function(data)
-				if data then
-					print_debug("[Input] : " .. data)
-					
-					-- List handler
-					if data.find(data,"list") then
-						masterserver:async_send("addserver (init = [echo \"Welcome to Killme's masterserver\"; echo \"have fun gaming :)\"]; init;)\n", function(success) end)
-						for i, row in ipairs(master.servers) do
-							sendmsg("addserver "..row.ip.." "..row.port..";")
-						end
-						
-						--close here?
-						server:close()
-						return
-					elseif string.match(data, 'regserv %i') then
-						local port = string.match(data, 'regserv %i')
-						local endpoint = server:remote_endpoint(server)
-						local ip = endpoint.ip;
-						master.servers[ip..':'..port] = { ['ip'] = ip, ['port'] = port }
-					elseif string.match(data, 'Login "(.-)" "(.-)" "(.-)"') then
-						local function_name, player_name, session_id, password = string.gmatch(data, "[^ \n]+")
-					end
-					read_data(server)
-				else
-					master:handleError("Read error")
-				end
-			end)
+		print(ip, port)
+		
+		if not self.server then
+			error("Failed to open a listen socket on " .. ip .. ":" .. port .. ": " .. error_, 1)
 		end
-		read_data(server)
+		
+		self.server:listen()
+		
+		print("Masterserver listning on %(1)s:%(2)s" % { ip, port })
+	end,
+	
+	accept = function(self)
+		self.server:async_accept(function (server)
+			remote = server:remote_endpoint(server)
+			
+			print(string.format("[Client] : (%s:%s) | accepted", remote.ip, remote.port))
+			
+			accepted_obj(server, remote):read()
+			self:accept()
+		end)
+	end,
+})
 
-		print_debug("[Input] : " .. "connection accepted")
-		allow_stream = true
+accepted_obj = class.new(nil, {
+	connection = nil,
+	authed = false,
+	remote = nil,
+	
+	__init = function(self, connection, remote)
+		self.connection = connection
+		self.remote = remote
+
+		server.sleep(1000, function()
+			self:send("req_serverauth")
+		end)
+	end,
+	
+	send = function(self, message, ...)
+		message = message % {...} 
+		
+		print(string.format("[Client] : (%s:%s) | sending: %s", self.remote.ip, self.remote.port, message))
+		self.connection:async_send(message.."\n", function(success) end)
+	end,
+	
+	close_current = function(self)
+		self.connection:close()
+	end,
+	
+	send_serverlist = function(self)
+		for i, server in pairs(master.servers) do
+			self:send("addserver %(1)s %(2)s", server.ip, server.port)
+		end
+	end,
+	
+	read = function(self)
+		self.connection:async_read_until("\n", function(data)
+			if data then
+				
+				if data == "" then return end
+				
+				--strip \n
+				data = data:gsub("\n", "")
+			
+				arguments = data:split(" ")
+				
+				--process the data
+				print("calling: %(1)s" % {arguments[1]})
+				
+				--send serverlist
+				if arguments[1] == "list" then
+					self:send_serverlist()
+					self:close_current()
+					return
+				
+				--send list of reserved names
+				elseif arguments[1] == "names" then
+					local msg = Json.Encode(alpha.db:query("SELECT name FROM names"):fetch())
+					msg = msg:gsub("\n", "\\n")
+					self:send("namelist %(1)s", msg)
+				
+				--send list of clantags
+				elseif arguments[1] == "clans" then
+					local msg = Json.Encode(alpha.db:query("SELECT tag FROM clans"):fetch())
+					msg = msg:gsub("\n", "\\n")
+					self:send("clanlist %(1)s", msg)
+				
+				--login request
+				elseif arguments[1] == "auth" then
+					--auth secret cn session_id hashed_password name
+				
+					local secret_table = server_secrets:get()
+				
+					if not secret_table[arguments[2]] then
+						self:send("login_fail %(1)i incorrect secret", arguments[4])
+					else
+				
+						local res = alpha.db:query([[
+							SELECT
+								users.id,
+								users.name,
+								users.pass,
+								users.email
+							FROM
+								users,
+								names
+							WHERE
+								names.user_id = users.id
+							AND
+								names.name = ?
+							]], arguments[6])--name
 					
-		accept_next(master.server_client)
-    end)
-end
+						if res:num_rows() < 1 then
+							self:send("login_fail %(1)i unkown name", arguments[4])
+						elseif res:num_rows() > 1 then --should not be possible
+							self:send("login_fail %(1)i ambigious", arguments[4])
+						else
+							local row = res:fetch()
+							
+							row = row[1]
+						
+							if crypto.tigersum(string.format("%i %i %s", arguments[3], arguments[4], row.pass)) == arguments[5] then
+					
+								self:send("login_success %(1)i %(2)s", arguments[4],  "aaa")
+							else
+								self:send("login_fail %(1)i incorrect password", arguments[4])
+							end
+						end
+					end
+				
+				elseif arguments[1] == "reqauth" and false then
+										
+						-- ReqAuth Handler
+						if string.match(data,"reqauth %d+ %w+ .*") then
+							local arguments = _.to_array(string.gmatch(data, "[^ \n]+"))
+							local request_id, name, domain = tonumber(arguments[2]), arguments[3]:lower(), (arguments[4] or "")
+							if not users[domain] then conoutf.debug(string.format("[Auth]   | (%s:%s) : auth nÂ°%s: Domain '%s' doesn't exist!", remote_endpoint.ip, remote_endpoint.port, request_id, domain)) return end
+							if not users[domain][name] or not users[domain][name][1] then conoutf.debug(string.format("[Auth]   | (%s:%s) : auth nÂ°%s: User '%s' doesn't exist in domain '%s' !", remote_endpoint.ip, remote_endpoint.port, request_id, name, domain)) return end
+							challenges[request_id] = generate_challenge(users[domain][name][1])
+							local challenge_str = challenges[request_id]:to_string()
+							conoutf.debug("[Auth]   | (%s:%s) : Attempting auth nÂ°%d for %s@%s", remote_endpoint.ip, remote_endpoint.port, request_id, name, domain or '')
+							sendmsg(string.format("chalauth %i %s", request_id, challenge_str))
+						end
+		
+						-- ConfAuth Handler
+						if string.match(data, "confauth %d+ .+") then
+							local arguments = _.to_array(string.gmatch(data, "[^ \n]+"))
+							local request_id, answer = tonumber(arguments[2]), arguments[3]
+							if not challenges[request_id] then return end
+							local challenge_expected_answer = challenges[request_id]:expected_answer(answer)
+							if challenge_expected_answer then 
+								conoutf.debug(string.format("[Auth]   | (%s:%s) : Succeded auth nÂ°%d with answer %s", remote_endpoint.ip, remote_endpoint.port, request_id, answer))
+								sendmsg(string.format("succauth %d", request_id))
+							else
+								conoutf.debug(string.format("[Auth]   | (%s:%s) : Failed auth nÂ°%d with answer %s", remote_endpoint.ip, remote_endpoint.port, request_id, answer))
+								sendmsg(string.format("failauth %d", request_id))
+							end
+							table.remove(challenges, request_id)
+						end
+		
+						-- QueryId Handler
+						if string.match(data, "QueryId %d+ %w+ .*") then
+							local arguments = _.to_array(string.gmatch(data, "[^ \n]+"))
+							local request_id, name, domain = tonumber(arguments[2]), arguments[3]:lower(), (arguments[4] or "")
+							if not users[domain] then 
+								conoutf.debug(string.format("[Auth]   | (%s:%s) : auth nÂ°%s: Domain '%s' doesn't exist!", remote_endpoint.ip, remote_endpoint.port, request_id, domain))
+								sendmsg(string.format("DomainNotFound %d", request_id))
+								return 
+							end
+							if not users[domain][name] or not users[domain][name][1] then
+								conoutf.debug(string.format("[Auth]   | (%s:%s) : auth nÂ°%s: User '%s' doesn't exist in domain '%s' !", remote_endpoint.ip, remote_endpoint.port, request_id, name, domain))
+								sendmsg(string.format("NameNotFound %d", request_id))
+								return 
+							end
+							conoutf.debug(string.format("[Auth]   | (%s:%s) : auth nÂ°%s: User '%s' found in domain '%s' with '%s' rights", remote_endpoint.ip, remote_endpoint.port, request_id, name, domain, users[domain][name][2]))
+							sendmsg(string.format("FoundId %d %s", request_id, users[domain][name][2]))
+						end
+					end
+				self:read()
+   		    else
+   		        self:error("read", "data is empty")
+   		    end
+	    end)
+	end,
+	
+	error = function(self, event, message, ...)
+		print("error on %(1)s : %(2)s" % {event, message % {...}})
+	end,
+	
+})
 
-
-print("*-*+*-* Sauerbraten MasterServer listening on " .. '0.0.0.0' .. ":" .. 10000 .." *-*+*-*")
-
-master.server_client:listen()
-
-masterserver = master.server_client
-accept_next(master.server_client)]]
+local master = server_obj("0.0.0.0", 28787)
+master:accept()
