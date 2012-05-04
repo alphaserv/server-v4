@@ -22,6 +22,9 @@ users = {}
 	Class: user_obj
 	The object that represents the user
 	
+	TODO:
+	create a player object that extends this class, to use with irc bot and master.
+	
 	Note:
 		this class may be partially overridden by modules
 ]]
@@ -97,13 +100,14 @@ user_obj = class.new(nil, {
 		
 		Parameters:
 			self -
-			... - ?
+			name - name of the object
+			id - the additional object_id or -1
 
 		Return:
 			true - Has access
 			false - Deny
 	]]
-	has_permission = function(self)
+	has_permission = function(self, name, id)
 		return true
 	end,
 	
@@ -117,7 +121,21 @@ user_obj = class.new(nil, {
 	
 	OnDisconnect = function(self)
 		server.player_msg(self.cn, "bb")
-	end,	
+	end,
+
+	--[[
+		Function: comparepassword
+		compares the passwords
+		
+		Parameters:
+			self -
+			password1 - the password entered by the user
+			password2 - the password from, the database?
+	]]
+	
+	comparepassword = function(self, pass1, pass2)
+		return pass1 == server.hashpassword(self.cn, pass2)	
+	end,
 	
 	--default stuff
 	msg = function(self, text) return server.player_msg(self.cn, text) end,
@@ -251,7 +269,7 @@ function OnDisconnect(cn)
 end
 
 --print("init user events")
-server.event_handler("connect", OnConnect)
+server.event_handler("connecting", OnConnect)
 server.event_handler("disconnect", OnDisconnect)
 
 --[[ TODO: Fix&optimalize or depricate ]]
