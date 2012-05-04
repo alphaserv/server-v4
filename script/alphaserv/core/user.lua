@@ -48,7 +48,7 @@ user_obj = class.new(nil, {
 	]]
 	user_id = -1,
 	
-	--[[
+	--[[!
 		Function: init
 		initializes the user
 		
@@ -61,7 +61,7 @@ user_obj = class.new(nil, {
 		self.cn = cn
 	end,
 
-	--[[
+	--[[!
 		Function: check
 		Checks if the user is still connected
 		
@@ -81,7 +81,7 @@ user_obj = class.new(nil, {
 		return true
 	end,
 	
-	--[[
+	--[[!
 		Function: auth
 		Authenticate the user and set the <user_id>.
 		
@@ -94,7 +94,7 @@ user_obj = class.new(nil, {
 		self.user_id = user_id
 	end,
 	
-	--[[
+	--[[!
 		Function: has_permission
 		Check if the user has the permission to execute a specific action
 		
@@ -111,7 +111,7 @@ user_obj = class.new(nil, {
 		return true
 	end,
 	
-	--[[
+	--[[!
 		Function: OnDisconnect
 		Called when the user disconnects
 		
@@ -123,7 +123,7 @@ user_obj = class.new(nil, {
 		server.player_msg(self.cn, "bb")
 	end,
 
-	--[[
+	--[[!
 		Function: comparepassword
 		compares the passwords
 		

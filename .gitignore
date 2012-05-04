@@ -1,9 +1,9 @@
 .svn
-conf/*
-log/*.log
-log/*.pid
+/conf/*
+/log/*.log
+/log/*.pid
 *_build
-serverexec
-core
-0
-1
+/serverexec
+/core
+/0
+/1
