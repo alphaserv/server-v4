@@ -83,6 +83,10 @@ message_object = class.new(nil, {
 		return self
 	end,
 	
+	unescaped_format = function (self, ...)
+		self.formated_message = self.message_string % arg
+	end,
+	
 	prefix = function(self, msg)
 		if self.message_type == "info" then
 			if true then

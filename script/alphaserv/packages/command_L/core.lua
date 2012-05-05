@@ -115,20 +115,42 @@ function exec_from_string(player, text)
 	
 	table.remove(words, 1) --remove command name
 	
-	server.player_msg(player.cn, "command: "..table_to_string(words))
-	
 	return execute_command(player, command_name, unpack(words))
 end
 
 events.on_text = server.event_handler("text", function(cn, text)
-	local result = pack(exec_from_string(user_from_cn(cn), text))
+	local user = user_from_cn(cn)
+
+	local result = pack(exec_from_string(user, text))
 	
 	if result[1] == -1 then
 		return
 	elseif result[1] == false then
-		server.player_msg(cn, "result: "..table.concat(result[2], " "))
+		if result[2] == true then --nextgen messages
+			messages.load("command", result[4].name, result[4])
+				:format(unpack(result[3]))
+				:send(cn, true)
+		else
+			local message = messages.load("command", text:gsub("#[^ ] (.*)", "")..":failed", { default_message = "red<%(1)s:> %(2)s" })
+			
+			for i, msg in pairs(result[2]) do
+				message:unescaped_format(text:gsub("#[^ ] (.*)", ""), msg)
+				message:send(cn, true)
+			end
+		end
 	elseif result[1] == true then
-		server.player_msg(cn, "result: "..table.concat(result[2], " "))
+		if result[2] == true then --nextgen messages
+			messages.load("command", result[4].name, result[4])
+				:format(unpack(result[3]))
+				:send(cn, true)
+		else
+			local message = messages.load("command", text:gsub("#[^ ] (.*)", ""), { default_message = "green<%(1)s:> %(2)s" })
+			
+			for i, msg in pairs(result[2]) do
+				message:unescaped_format(text:gsub("#[^ ] (.*)", ""), msg)
+				message:send(cn, true)
+			end
+		end
 	end
 	
 	return -1
