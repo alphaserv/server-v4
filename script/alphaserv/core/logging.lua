@@ -231,14 +231,13 @@ function debug(level, text)
 		elseif alpha.init_done and messages and messages.load then
 			messages.load("DEBUG", "debug_"..name, {default_type = "debug", default_message = "DEBUG %(1)s(%(2)s): %(3)s"})
 				:format(name, level, text)
-				:send(server.players(), false)
+				:send()
 
 		end
 
-	
-		if irc and irc.send then
-			irc.send(text)
-		end
+		--if irc and irc.send then
+		--	irc.send(text)
+		--end
 		
 		if level == debuglevels.FATAL then
 			error(msg)

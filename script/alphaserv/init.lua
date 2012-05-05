@@ -37,6 +37,7 @@ alpha.load.file("core/general")
 
 alpha.load.file("core/package")
 
+alpha.load.file("core/user_base")
 alpha.load.file("core/user")
 
 --for authkey auth TODO: module

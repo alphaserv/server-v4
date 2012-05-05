@@ -57,7 +57,9 @@ write()
 
 local current_init = user_obj.__init
 user_obj.__init = function(self, ...)
-	current_init(self, ...)
+	if current_init then
+		current_init(self, ...)
+	end
 	self:reinit_acl()
 end
 

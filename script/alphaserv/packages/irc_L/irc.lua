@@ -1,6 +1,6 @@
 module("irc", package.seeall)
 
-user_obj = class.new(nil, {
+user_obj = class.new(alpha.user.user_base_obj, {
 	nick = "",
 	joined_chans = {},
 	
@@ -12,6 +12,10 @@ user_obj = class.new(nil, {
 		if not self.joined_chans[name] then	
 			self.joined_chans[name] = "none"
 		end
+	end,
+	
+	name = function(self)
+		return self.nick
 	end
 })
 
@@ -39,8 +43,7 @@ local table = alpha.settings.new_setting("irc_networks", {
 			ignore_non_ops = false,
 			nickname = "testbot",
 			username = "alpha-bot",
-			flood_interval = 1000,
-			blaat = "!"	
+			flood_interval = 1000
 		}
 	}
 }, "A hierachy of networks, channels and settings.")

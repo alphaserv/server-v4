@@ -29,7 +29,7 @@ users = {}
 		this class may be partially overridden by modules
 ]]
 
-user_obj = class.new(nil, {
+user_obj = class.new(user_base_obj, {
 	--[[!
 		Property: sid
 		The session id of the user, checked to see if the user is still connected
@@ -120,7 +120,7 @@ user_obj = class.new(nil, {
 	]]
 	
 	OnDisconnect = function(self)
-		server.player_msg(self.cn, "bb")
+
 	end,
 
 	--[[!
@@ -192,7 +192,14 @@ user_obj = class.new(nil, {
 	Section: alpha.user
 ]]
 
-_G.user_obj = user_obj
+_G.user_obj = {}
+
+setmetatable(_G.user_obj, {
+	__newindex = function(table, index, value)
+		user_obj[index] = value
+		user_base_obj[index] = value
+	end
+})
 
 events = {}
 

@@ -142,8 +142,10 @@ message_object = class.new(nil, {
 			error("cannot send a message to a string player")
 		end
 		
-		if to == nil then
-			to = players.groups.all()
+		if to == nil and server.players then
+			to = server.players()
+		else
+			to = {}
 		end
 		
 		for _, cn in pairs(to) do
