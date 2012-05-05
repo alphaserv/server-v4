@@ -85,6 +85,10 @@ function execute_command(player, name, ...)
 		return false, { "could not find command!" }
 	end
 	
+	if acl and not player:has_permission("command:execute:"..name) then
+		return false, {"access denied"}
+	end
+	
 	return command:execute(player, ...)
 end
 

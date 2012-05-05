@@ -6,7 +6,7 @@ local you_replacing = alpha.settings.new_setting("You_replacing", true, "Replace
 message_object = class.new(nil, {
 	message_string = "",
 	message_type = "info",
-	formated_message = false
+	formated_message = false,
 	use_irc = false,
 	
 	message_name = "",

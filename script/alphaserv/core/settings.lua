@@ -142,6 +142,12 @@ writers = {
 
 setting_obj = class.new(nil, {
 	--[[!
+		Property: written
+		Already written to a file
+	]]
+
+	written = false,
+	--[[!
 		Property: setting
 		The setting value
 	]]
@@ -391,7 +397,10 @@ function write(filename, header)
 	end
 	
 	for i, setting in pairs(settings) do
-		file:write(setting:write(i))
+		if not setting.written then
+			file:write(setting:write(i))
+			setting.written = true
+		end
 	end
 	
 	file:close()
