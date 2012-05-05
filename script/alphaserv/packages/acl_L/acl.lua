@@ -104,7 +104,7 @@ user_obj.has_permission = function(self, name, id)
 		log_msg(LOG_DEBUG, "Checking %(1)q" % {item})
 	end
 	
-	-- [[
+	-- [ [
 	log_msg(LOG_DEBUG, "Checking "..tostring(type(self.access[name]) ~= "boolean") or "false")
 	log_msg(LOG_DEBUG, "Checking "..tostring(type(acl.objects[name]) == "table"))
 	log_msg(LOG_DEBUG, "Checking "..tostring(type(acl.objects[name].default) == "boolean"))]]

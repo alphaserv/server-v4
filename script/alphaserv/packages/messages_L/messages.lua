@@ -2,6 +2,7 @@
 module("messages", package.seeall)
 
 local you_replacing = alpha.settings.new_setting("You_replacing", true, "Replace the name of a player with you")
+local backend = alpha.settings.new_setting("message_backend", "file", "The backend to use for messages, can be: file or db.")
 
 message_object = class.new(nil, {
 	message_string = "",
@@ -153,20 +154,46 @@ message_object = class.new(nil, {
 	end,
 })
 
+local f_loaded = false
 local cache = {}
 function load(module, name, default)
 	if not cache[module.."::"..name] then
-		local result = alpha.db:query("SELECT id, name, module, message FROM messages WHERE name = ? AND module = ?;", name, module)
+		local backend = backend:get()
+		if bakend == "db" then
+			local result = alpha.db:query("SELECT id, name, module, message FROM messages WHERE name = ? AND module = ?;", name, module)
 		
-		if result:num_rows() < 1 then
-			alpha.db:query("INSERT INTO messages (name, module, message) VALUES (?, ?, ?)", name, module, default.default_message)
+			if result:num_rows() < 1 then
+				alpha.db:query("INSERT INTO messages (name, module, message) VALUES (?, ?, ?)", name, module, default.default_message)
 			
-			row = {name = name, module = module, message = default.default_message}
-		else
-			row = result:fetch()[1]
-		end
+				row = {name = name, module = module, message = default.default_message}
+			else
+				row = result:fetch()[1]
+			end
 		
-		cache[module.."::"..name] = row
+			cache[module.."::"..name] = row
+		elseif backend == "file" then
+			if not f_loaded then
+				if server.file_exists("conf/messages.lua") then
+					server.msg("Loading message ..")
+					cache = dofile("conf/messages.lua")
+				end
+				f_loaded = true
+			end
+			
+			if not cache[module.."::"..name] then
+				cache[module.."::"..name] = {message = default.default_message, module = module, name = name, use_irc = default.use_irc}
+			
+				local file = io.open("conf/messages.lua", "w")
+	
+				file:write("--[[\n")
+				file:write("All Changable Messages.\n")
+				file:write("]]--\n")
+
+				file:write("return "..alpha.settings.serialize_data(cache, 0))
+	
+				file:close()
+			end
+		end
 	end
 	
 	return message_object():from_data(cache[module.."::"..name])
