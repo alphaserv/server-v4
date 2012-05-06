@@ -1,5 +1,5 @@
 
-command_from_table("chucknorris", {
+command.command_from_table("chucknorris", {
 	name = "chucknorris",
 	usage = "usage: #chucknorris",
 	

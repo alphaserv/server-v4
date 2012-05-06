@@ -1,5 +1,5 @@
 
-command_from_table("quote", {
+command.command_from_table("quote", {
 	name = "quote",
 	usage = "usage: #quote <category>",
 	
@@ -12,7 +12,7 @@ command_from_table("quote", {
 	end,
 	
 	execute = function(self, player)
-		local quote = get_random_quote(category or "jokes")
+		local quote = quotes.get_random_quote(category or "jokes")
 		quote = quote:split("\n") --make it an array
 		return true, quote
 	end,

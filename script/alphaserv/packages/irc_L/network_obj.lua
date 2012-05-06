@@ -1,16 +1,16 @@
 --[[!
-    File: script/alphaserv/packages/network_obj.lua
+	File: script/alphaserv/packages/network_obj.lua
 
-    About: Author
-        Killme
+	About: Author
+		Killme
 
-    About: Copyright
-        Copyright (c) 2012 Alphaserv project
+	About: Copyright
+		Copyright (c) 2012 Alphaserv project
 
-    About: Purpose
+	About: Purpose
 		This file contains the network object wich handles connections with the server and the channels.
 
-    Package: irc
+	Package: irc
 ]]
 
 module("irc", package.seeall)
@@ -258,11 +258,11 @@ network_obj = class.new(nil, {
 				return
 			else
 				self.connected = true
-		        self.adress = self.client:local_endpoint()
+				self.adress = self.client:local_endpoint()
 				print("[IRC] : Local socket address %(1)s:%(2)s" % { self.adress.ip, self.adress.port })
 				
 				self:updatenick(function() self:updateusername() end)
-		    end
+			end
 		end)
 	end,
 	
@@ -353,16 +353,61 @@ network_obj = class.new(nil, {
 		if command_msg[1] == "#" or nick == channel then
 			if nick ~= channel then
 				command_msg = command_msg:sub(2)
+			elseif command_msg:find("^auth") then
+				local cmd = command_msg:gsub("^([^ ]) ")
+				cmd = cmd:split(" ")
+				
+				local username
+				local pwd
+				
+				if #cmd == 1 then
+					username = nick
+					pwd = cmd[1]
+				elseif #cmd == 2 then
+					username = cmd[1]
+					pwd = cmd[2]
+				else
+					self:message(channel, "Could not authenticate: too many or too little arguments, usage: auth <pass>")
+					return
+				end
+				
+				if not auth then
+					self:message(channel, "Could not authenticate: authentication module not loaded, please contact the bot owner")
+					return
+				end
+				
+				local result, messages = auth.checkall("auth", self.users[nick], pwd)
+				
+				for i, msg in pairs(messages) do
+					self:message(channel, msg)
+				end
+				
 			end
-			command_msg = command_msg:split(" ")
-			local result, msg = command.execute_command(self.users[nick], unpack(command_msg))
 			
-			if not result then
+			command_msg = command_msg:split(" ")
+			local result = pack(command.execute_command(self.users[nick], unpack(command_msg)))
+			
+			if result[1] == false then
+				if result[2] == true then --nextgen messages
+					self:message(channel, result[4].default_message % result[3])
+					return
+				end
+			elseif result[1] == true then
+				if result[2] == true then --nextgen messages
+					self:message(channel, result[4].default_message % result[3])
+				end
+			end
+			
+			if not result[1] then
 				self:message(channel, "command failed:")
 			end
 			
-			for i, message in pairs(msg) do
-				self:message(channel, message)
+			if type(result[2]) == "table" then
+				for i, message in pairs(result[2]) do
+					self:message(channel, message)
+				end
+			elseif type(result[2]) == "string" then
+				self:message(channel, result[2])
 			end
 		end
 	end,
@@ -470,12 +515,19 @@ network_obj = class.new(nil, {
 						if channel == self.nick then
 							channel = nick
 						end
-
-					    self:command(nick, channel, command)
+						
+						local res, error = native_pcall(function()
+						   self:command(nick, channel, command)
+						end)
+						
+						if not res then
+							log_msg(LOG_ERROR, "error on command execution: "..error)
+							self:message(channel, "Internal error: "..error)
+						end
 					end
 				end				
 				
-            	self:read()
+				self:read()
 			else
 				error("EOF from server")
 			end

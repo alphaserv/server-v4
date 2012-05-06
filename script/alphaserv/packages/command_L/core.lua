@@ -1,26 +1,20 @@
 module("command", package.seeall)
 
+local enabled_commands = alpha.settings.new_setting("commands_enabled", {"help", "enable_command", "disable_command"}, "The commands to enable.")
+
 command_obj = class.new(nil, {
 	name = "demo",
 	
 	list = function(self, player)
-		--if player:can_do(self.name..":list") then
-			return true, "red<"..name..">"
-		--else
-		--	return false
-		--end
+		return true, "red<"..name..">"
 	end,
 	
 	help = function(self, player)
-		--if player:can_do(self.name..":help") then
-			return true, name..": A command wich is not implemented."
-		--else
-		--	return false
-		--end		
+		return true, name..": A command wich is not implemented."
 	end,
 	
 	execute = function(self, player, ...)
-		return false, {"command not implemented :/"}		
+		return false, true, {name, "Command not implemented"} , { name = "cmd_fail", default_message = "red<Could not execute command> orange<#%(1)s>red<:> orange<%(2)s>!!!" }
 	end,
 	
 	enable = function(self) end,
@@ -46,27 +40,27 @@ end
 
 function enable_command(name)
 	if commands[name] then
-		return false, {"command already loaded"}
+		return false, true, {name, "command already loaded"} , { name = "enable_fail", default_message = "red<Could not enable command> orange<#%(1)s>red<:> orange<%(2)s>!!!" }
 	elseif not loaded_commands[name] then
-		return false, {"could not find command"}
+		return false, true, {name, "could not find command"} , { name = "enable_fail", default_message = "red<Could not enable command> orange<#%(1)s>red<:> orange<%(2)s>!!!" }
 	else
 		commands[name] = loaded_commands[name]()
 		local ret = pack(commands[name]:enable())
 		
-		return unpack(ret)
+		return true, unpack(ret)
 	end
 end
 
 function disable_command(name)
 	if not commands[name] then
-		return false, {"command not loaded"}
+		return false, true, {name, "command not loaded"} , { name = "disable_fail", default_message = "red<Could not disable command> orange<#%(1)s>red<:> orange<%(2)s>!!!" }
 	elseif not loaded_commands[name] then
-		return false, {"could not find command"}
+		return false, true, {name, "could not find command"} , { name = "disable_fail", default_message = "red<Could not enable command> orange<#%(1)s>red<:> orange<%(2)s>!!!" }
 	else
 		local ret = pack(commands[name]:disable())
 		commands[name] = nil
 		
-		return unpack(ret)
+		return true, unpack(ret)
 	end
 end
 
@@ -80,9 +74,13 @@ function execute_command(player, name, ...)
 	
 	if not command then
 		if loaded_commands[name] then
-			return false, {"command not loaded"}
+		return false, true, {name, "command not loaded"} , { name = "cmd_fail", default_message = "red<Could not execute command> orange<#%(1)s>red<:> orange<%(2)s>!!!" }
 		end
-		return false, { "could not find command!" }
+		return false, true, {name, "command not found"}, { name = "cmd_fail", default_message = "red<Could not execute command> orange<#%(1)s>red<:> orange<%(2)s>!!!" }
+	end
+	
+	if acl and not player:has_permission("command:execute:"..name) then
+		return false, true, {name, "access denied"} , { name = "cmd_fail", default_message = "red<Could not execute command> orange<#%(1)s>red<:> orange<%(2)s>!!!" }
 	end
 	
 	return command:execute(player, ...)
@@ -98,7 +96,7 @@ function is_command(string)
 end
 
 function exec_from_string(player, text)
-	local ret, newtext = is_command(text)
+	local ret, newtext, char = is_command(text)
 	
 	if not ret then
 		--ignore
@@ -111,20 +109,64 @@ function exec_from_string(player, text)
 	
 	table.remove(words, 1) --remove command name
 	
-	server.player_msg(player.cn, "command: "..table_to_string(words))
+	local res
 	
-	return execute_command(player, command_name, unpack(words))
+	local success, error_ = native_pcall(function()
+		res = pack(execute_command(player, command_name, unpack(words)))
+	end)
+	
+	if not success then
+		return false, {"error while executing command: ", error_}
+	end
+
+	return unpack(res)
 end
 
 events.on_text = server.event_handler("text", function(cn, text)
-	local result = pack(exec_from_string(user_from_cn(cn), text))
-	
+	local user = user_from_cn(cn)
+
+	local command_name = text:gsub("^[^ ](.*)", "")
+
+	local result = pack(exec_from_string(user, text))
+
 	if result[1] == -1 then
 		return
 	elseif result[1] == false then
-		server.player_msg(cn, "result: "..table.concat(result[2], " "))
+		if result[2] == true then --nextgen messages
+			messages.load("command", result[4].name, result[4])
+				:format(unpack(result[3]))
+				:send(cn, true)
+		else
+			local message = messages.load("command", text:gsub("[^ ] (.*)", "")..":failed", { default_message = "red<%(1)s:> %(2)s" })
+			
+			if type(result[2]) ~= "table" then
+				result[2] = { result[2] }
+			end
+			
+			for i, msg in pairs(result[2]) do
+				message:unescaped_format(command_name, msg)
+				message:send(cn, true)
+			end
+		end
 	elseif result[1] == true then
-		server.player_msg(cn, "result: "..table.concat(result[2], " "))
+		if result[2] == true then --nextgen messages
+			messages.load("command", result[4].name, result[4])
+				:format(unpack(result[3]))
+				:send(cn, true)
+		else
+			local message = messages.load("command", text:gsub("[^ ] (.*)", ""), { default_message = "green<%(1)s:> %(2)s" })
+
+			if type(result[2]) ~= "table" then
+				result[2] = { result[2] }
+			end
+
+			for i, msg in pairs(result[2]) do
+				if msg ~= "" then
+					message:unescaped_format(command_name, msg)
+					message:send({cn}, true)
+				end
+			end
+		end
 	end
 	
 	return -1
@@ -138,37 +180,43 @@ command_from_table("help", {
 	end,
 	
 	help = function(self, player)
-		return false
+		return true, true, {self.name, "Display infomational messages about commands"}, { name = "help_info", default_message = "About green<#%(1)s:> %(2)s" }
 	end,
 	
 	execute = function(self, player, command)
 		if not command then
-			local list = ""
+			local list = "Available commands:\n"
 		
 			local first = true
 			for i, command in pairs(commands) do
-				local use, string = command:list()
+				if player:has_permission("command:list:"..command.name) then
+					local use, string = command:list()
 			
-				if use then
-					if not first then
-						list = list ..", "
-					else
-						first = false
-					end
+					if use then
+						if not first then
+							list = list ..", "
+						else
+							first = false
+						end
 				
-					list = list .. string
+						list = list .. string
+					end
 				end
 			end
 		
 			return true, list:split("\n")
 		else
-			local cmd = get_command(command)
+			if player:has_permission("command:help:"..command) then
+				local cmd = get_command(command)
 			
-			if not cmd then
-				return false, { "command not found" }
+				if not cmd then
+					return false, true, {name, "command not found"} , { name = "help_fail", default_message = "red<Could not print help text for command> orange<#%(1)s>red<:> orange<%(2)s>!!!" }
+				end
+			
+				return cmd:help(player)
+			else
+				return false, true, {name, "access denied"} , { name = "help_fail", default_message = "red<Could not print help text for command> orange<#%(1)s>red<:> orange<%(2)s>!!!" }
 			end
-			
-			return cmd:help()
 		end
 	end,
 })
@@ -187,16 +235,23 @@ command_from_table("enable_command", {
 	
 	execute = function(self, player, command)
 		if not command then
-			return false, {self.usage}
+			return false, true, {self.name, self.usage} , { name = "command_usage", default_message = "Usage of orange<#%(1)s>: %(2)s" }
 		end
 		
-		local res = enable_command(command) or {}
+		local res = pack(enable_command(command))
+		
+		if not res[1] then
+			table.remove(res, 1)
+			return unpack(res)
+		end
+		
+		res = res[2] or {}
 		
 		for i, row in pairs(res) do
 			res[i] = tostring(row)
 		end
 		
-		return true, {"Command green<enabled>", "result: ", unpack(res)}
+		return true, {"Command green<enabled>, result: ", unpack(res)}
 	end,
 })
 
@@ -214,18 +269,29 @@ command_from_table("disable_command", {
 	
 	execute = function(self, player, command)
 		if not command then
-			return false, {self.usage}
+			return false, true, {self.name, self.usage} , { name = "command_usage", default_message = "Usage of orange<#%(1)s>: %(2)s" }
 		end
 		
-		local res = disable_command(command) or {}
+		local res = pack(disable_command(command))
+		
+		if not res[1] then
+			table.remove(res, 1)
+			return unpack(res)
+		end
+		
+		res = res[2] or {}
 		
 		for i, row in pairs(res) do
 			res[i] = tostring(row)
 		end
 		
-		return true, {"Command green<disabled>", "result: ", unpack(res)}
+		return true, {"Command orange<disabled>, result: ", unpack(res)}
 	end,
 })
 
-enable_command("help")
-enable_command("enable_command")
+
+server.event_handler("pre_started", function()
+	for i, cmd in pairs(enabled_commands:get()) do
+		enable_command(cmd)
+	end
+end)

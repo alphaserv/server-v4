@@ -157,7 +157,7 @@ channel_obj = class.new(nil, {
 				self:add_user(name, "none")
 			end
 			
-			log_msg(LOG_INFO, "detected user %(1)q" % { name })
+			--log_msg(LOG_INFO, "detected user %(1)q" % { name })
 		end
 	end,
 	

@@ -2,10 +2,12 @@
 module("messages", package.seeall)
 
 local you_replacing = alpha.settings.new_setting("You_replacing", true, "Replace the name of a player with you")
+local backend = alpha.settings.new_setting("message_backend", "file", "The backend to use for messages, can be: file or db.")
 
 message_object = class.new(nil, {
 	message_string = "",
 	message_type = "info",
+	formated_message = false,
 	use_irc = false,
 	
 	message_name = "",
@@ -76,7 +78,13 @@ message_object = class.new(nil, {
 		 
 	
 	format = function(self, ...)
-		self.message_string = self.message_string % self:escape(arg)
+		self.formated_message = self.message_string % self:escape(arg)
+		
+		return self
+	end,
+	
+	unescaped_format = function (self, ...)
+		self.formated_message = self.message_string % arg
 		
 		return self
 	end,
@@ -92,7 +100,7 @@ message_object = class.new(nil, {
 	end,
 	
 	color = function(self, to, is_private)
-		local msg = self.message_string
+		local msg = self.formated_message or self.message_string
 		
 		msg = self:prefix(msg)
 		
@@ -114,7 +122,7 @@ message_object = class.new(nil, {
 		end)
 
 		msg = string.gsub(msg, "name<(.-)>", function(cn)
-			if tonumber(cn) == to and you_Replacing:get() then
+			if tonumber(cn) == to and you_replacing:get() then
 				return "you"
 			elseif server.valid_cn(cn) then
 				return server.player_displayname(cn)
@@ -128,16 +136,12 @@ message_object = class.new(nil, {
 	
 	send = function(self, to, is_private)
 	
-		if type(to) == "number" then
+		if type(to) ~= "table" then
 			to = {to}
 		end
-		
-		if type(to) == "string" then
-			error("cannot send a message to a string player")
-		end
-		
-		if to == nil then
-			to = players.groups.all()
+
+		if (to == {} or #to == 0) and server.players then
+			to = server.players()
 		end
 		
 		for _, cn in pairs(to) do
@@ -145,27 +149,53 @@ message_object = class.new(nil, {
 		end
 		
 		if self.use_irc and irc and irc.send then
-			irc.send(self.message_string)
+			irc.send(self.formated_message or self.message_string)
 		end
 		
 		return self
 	end,
 })
 
+local f_loaded = false
 local cache = {}
 function load(module, name, default)
 	if not cache[module.."::"..name] then
-		local result = alpha.db:query("SELECT id, name, module, message FROM messages WHERE name = ? AND module = ?;", name, module)
+		local backend = backend:get()
+		if bakend == "db" then
+			local result = alpha.db:query("SELECT id, name, module, message FROM messages WHERE name = ? AND module = ?;", name, module)
 		
-		if result:num_rows() < 1 then
-			alpha.db:query("INSERT INTO messages (name, module, message) VALUES (?, ?, ?)", name, module, default.default_message)
+			if result:num_rows() < 1 then
+				alpha.db:query("INSERT INTO messages (name, module, message) VALUES (?, ?, ?)", name, module, default.default_message)
 			
-			row = {name = name, module = module, message = default.default_message}
-		else
-			row = result:fetch()[1]
-		end
+				row = {name = name, module = module, message = default.default_message}
+			else
+				row = result:fetch()[1]
+			end
 		
-		cache[module.."::"..name] = row
+			cache[module.."::"..name] = row
+		elseif backend == "file" then
+			if not f_loaded then
+				if server.file_exists("conf/messages.lua") then
+					server.msg("Loading message ..")
+					cache = dofile("conf/messages.lua")
+				end
+				f_loaded = true
+			end
+			
+			if not cache[module.."::"..name] then
+				cache[module.."::"..name] = {message = default.default_message, module = module, name = name, use_irc = default.use_irc}
+			
+				local file = io.open("conf/messages.lua", "w")
+	
+				file:write("--[[\n")
+				file:write("All Changable Messages.\n")
+				file:write("]]--\n")
+
+				file:write("return "..alpha.settings.serialize_data(cache, 0))
+	
+				file:close()
+			end
+		end
 	end
 	
 	return message_object():from_data(cache[module.."::"..name])

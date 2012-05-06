@@ -37,6 +37,7 @@ alpha.load.file("core/general")
 
 alpha.load.file("core/package")
 
+alpha.load.file("core/user_base")
 alpha.load.file("core/user")
 
 --for authkey auth TODO: module
@@ -47,10 +48,18 @@ if server.file_exists("conf/core.lua") then
 	alpha.load.file("conf/core.lua", true)
 end
 
-trigger_config()
-
 --force proper configuration scheme
 alpha.settings.write("conf/core.lua")
+
+trigger_config()
+
+--generate default config if file not found
+if server.file_exists("conf/modules.lua") then
+	alpha.load.file("conf/modules.lua", true)
+end
+
+--force proper configuration scheme
+alpha.settings.write("conf/modules.lua")
 
 server.event_handler("started", function()
 	local mem = gcinfo()
