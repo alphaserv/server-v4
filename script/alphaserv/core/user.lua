@@ -60,6 +60,11 @@ user_obj = class.new(user_base_obj, {
 		self.sid = server.player_sessionid(cn)
 		self.cn = cn
 	end,
+	
+	set_cn = function(self,cn)
+		self.sid = server.player_sessionid(cn)
+		self.cn = cn
+	end,
 
 	--[[!
 		Function: check
@@ -257,7 +262,8 @@ end]]
 
 function OnConnect(cn)
 	users[cn] = user_obj(cn)
-
+	users[cn]:set_cn(cn)
+	
 	--print("connect, table is now: "..table_to_string(users, true, true).." (added: "..table_to_string(users[cn], true, true)..")")
 end
 

@@ -2,12 +2,12 @@
 return {
 	name = "playercommands",
 	dependics = {
-		"database",
-		--"acl",
+		"acl",
 		"messages"
 	},
 	load = {
 		"core.lua",
+		"extract.lua"
 	}
 }
 	

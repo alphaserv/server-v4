@@ -1,5 +1,7 @@
 module("command", package.seeall)
 
+local enabled_commands = alpha.settings.new_setting("commands_enabled", {"help", "enable_command", "disable_command"}, "The commands to enable.")
+
 command_obj = class.new(nil, {
 	name = "demo",
 	
@@ -107,14 +109,26 @@ function exec_from_string(player, text)
 	
 	table.remove(words, 1) --remove command name
 	
-	return execute_command(player, command_name, unpack(words))
+	local res
+	
+	local success, error_ = native_pcall(function()
+		res = pack(execute_command(player, command_name, unpack(words)))
+	end)
+	
+	if not success then
+		return false, {"error while executing command: ", error_}
+	end
+
+	return unpack(res)
 end
 
 events.on_text = server.event_handler("text", function(cn, text)
 	local user = user_from_cn(cn)
 
+	local command_name = text:gsub("^[^ ](.*)", "")
+
 	local result = pack(exec_from_string(user, text))
-	
+
 	if result[1] == -1 then
 		return
 	elseif result[1] == false then
@@ -125,8 +139,12 @@ events.on_text = server.event_handler("text", function(cn, text)
 		else
 			local message = messages.load("command", text:gsub("[^ ] (.*)", "")..":failed", { default_message = "red<%(1)s:> %(2)s" })
 			
+			if type(result[2]) ~= "table" then
+				result[2] = { result[2] }
+			end
+			
 			for i, msg in pairs(result[2]) do
-				message:unescaped_format(text:gsub("[^ ] (.*)", ""), msg)
+				message:unescaped_format(command_name, msg)
 				message:send(cn, true)
 			end
 		end
@@ -137,10 +155,16 @@ events.on_text = server.event_handler("text", function(cn, text)
 				:send(cn, true)
 		else
 			local message = messages.load("command", text:gsub("[^ ] (.*)", ""), { default_message = "green<%(1)s:> %(2)s" })
-			
+
+			if type(result[2]) ~= "table" then
+				result[2] = { result[2] }
+			end
+
 			for i, msg in pairs(result[2]) do
-				message:unescaped_format(text:gsub("[^ ] (.*)", ""), msg)
-				message:send(cn, true)
+				if msg ~= "" then
+					message:unescaped_format(command_name, msg)
+					message:send({cn}, true)
+				end
 			end
 		end
 	end
@@ -161,7 +185,7 @@ command_from_table("help", {
 	
 	execute = function(self, player, command)
 		if not command then
-			local list = ""
+			local list = "Available commands:\n"
 		
 			local first = true
 			for i, command in pairs(commands) do
@@ -265,6 +289,9 @@ command_from_table("disable_command", {
 	end,
 })
 
-enable_command("help")
-enable_command("enable_command")
-enable_command("disable_command")
+
+server.event_handler("pre_started", function()
+	for i, cmd in pairs(enabled_commands:get()) do
+		enable_command(cmd)
+	end
+end)

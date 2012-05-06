@@ -85,6 +85,8 @@ message_object = class.new(nil, {
 	
 	unescaped_format = function (self, ...)
 		self.formated_message = self.message_string % arg
+		
+		return self
 	end,
 	
 	prefix = function(self, msg)
@@ -120,7 +122,7 @@ message_object = class.new(nil, {
 		end)
 
 		msg = string.gsub(msg, "name<(.-)>", function(cn)
-			if tonumber(cn) == to and you_Replacing:get() then
+			if tonumber(cn) == to and you_replacing:get() then
 				return "you"
 			elseif server.valid_cn(cn) then
 				return server.player_displayname(cn)
@@ -134,18 +136,12 @@ message_object = class.new(nil, {
 	
 	send = function(self, to, is_private)
 	
-		if type(to) == "number" then
+		if type(to) ~= "table" then
 			to = {to}
 		end
-		
-		if type(to) == "string" then
-			error("cannot send a message to a string player")
-		end
-		
-		if to == nil and server.players then
+
+		if (to == {} or #to == 0) and server.players then
 			to = server.players()
-		else
-			to = {}
 		end
 		
 		for _, cn in pairs(to) do

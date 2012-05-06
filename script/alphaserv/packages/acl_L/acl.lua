@@ -86,8 +86,9 @@ end
 
 user_obj.load_groups = function(self) end
 
-local parent_auth = user_obj.auth
+local parent_auth = user_obj.auth or function () end
 user_obj.auth = function(self, user_id, ...)
+	self.user_id = user_id
 	parent_auth(self, user_id, ...)
 	self:reinit_acl()
 end
