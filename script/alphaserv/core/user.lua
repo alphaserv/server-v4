@@ -557,3 +557,47 @@ function _G.all_obj_user()
 	return list_obj(users)
 end
 
+searchers = {
+	not_cn = function(list, arg)
+		for _, cn in pairs(arg) do
+			if list[cn] then
+				table.remove(list, cn)
+			end
+		end
+	end,
+	
+	cn = function(list, arg)
+		local newlist = {}
+		for _, cn in pairs(arg) do
+			newlist[cn] = list[cn]
+		end
+		
+		list = nil
+		list = newlist
+	end,
+	
+	has_permission = function(list, arg)
+		for cn, player in pairs(list) do
+			if not player:has_permission(arg) then
+				list[cn] = nil
+			end
+		end
+	end
+}
+
+function _G.find_players(search, objects)
+	local users = table.copy(users)
+	
+	for search, value in pairs(search) do
+		if not searchers[search] then
+			log_msg(LOG_ERROR, "Could not filter players, field \""..search.."\" not found as searcher")
+		else
+			if type(value) ~= "table" then
+				value = {value}
+			end
+			
+			searchers[search](users, value)
+			
+		end
+	end
+end
