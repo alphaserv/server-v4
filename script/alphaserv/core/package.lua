@@ -28,7 +28,7 @@ end
 module("alpha.package", package.seeall)
 
 local loaded = {}
-local package_path = alpha.module_prefix.."packages/"
+package_path = alpha.module_prefix.."packages/"
 
 --[[!
     Function: loadpackage

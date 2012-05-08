@@ -1,5 +1,15 @@
 module("spectator.lock", package.seeall)
 
+function count(table)
+	local i = 0
+	
+	for _, _ in pairs(table) do
+		i = i + 1
+	end
+	
+	return i
+end
+
 lock_obj = class.new(nil, {
 	is_locked = function(self, player) end,
 	try_unspec = function(self, player) end,
@@ -24,7 +34,7 @@ user_obj.is_locked = function(self)
 		end
 	end
 	
-	return i > 0
+	return count(self.locks) > 0
 end
 
 user_obj.spec = function(self)
@@ -72,18 +82,20 @@ end
 
 user_obj.check_locks = function(self, way)
 
-	for j, lock in ipairs(self.locks) do
+	for j, lock in pairs(self.locks) do
 		if not lock:is_locked(self) then
-			table.remove(self.locks, j)
+			log_msg(LOG_DEBUG, "Removing lock! "..tostring(j))
+			self.locks[j] = nil
 		end
 	end
 	
-	server.msg("locks: "..#self.locks)
+	log_msg(LOG_DEBUG, "locks: "..count(self.locks))
 	
-	if #self.locks ~= 0 and way == "0" then
+	if count(self.locks) ~= 0 and way == "0" then
 		log_msg(LOG_DEBUG,"blocked (un)spec")
 		self:spec()
-	elseif self.was_speced_by_us and not self:is_locked() then
+	elseif self.was_speced_by_us and not self:is_locked() then	
+		log_msg(LOG_DEBUG, "Unspec")
 		self.was_speced_by_us = false
 		server.sleep(500, function()
 			self:unspec()
@@ -99,5 +111,5 @@ end
 	local user = user_from_cn(cn)
 	user:check_locks(way)
 	
-	server.msg("way == "..way)
+	log_msg(LOG_DEBUG, "way == "..way)
 end)

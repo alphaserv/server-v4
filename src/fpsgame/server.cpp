@@ -1562,7 +1562,7 @@ namespace server
 
     int welcomepacket(packetbuf &p, clientinfo *ci)
     {
-        int hasmap = (m_edit && (clients.length()>1 || (ci && ci->local))) || (smapname[0] && (gamemillis<gamelimit || (ci && ci->state.state==CS_SPECTATOR) || numclients(ci && ci->local ? ci->clientnum : -1)));
+        int hasmap = (m_edit && (clients.length()>1 || (ci && ci->local))) || (smapname[0] && (gamemillis<gamelimit /*|| (ci && ci->state.state==CS_SPECTATOR)*/ || numclients(ci && ci->local ? ci->clientnum : -1)));
         putint(p, N_WELCOME);
         putint(p, hasmap);
         if(hasmap)

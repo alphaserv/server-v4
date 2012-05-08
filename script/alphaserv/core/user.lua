@@ -282,7 +282,7 @@ function OnDisconnect(cn)
 end
 
 --print("init user events")
-server.event_handler("connecting", OnConnect)
+server.event_handler("connect", OnConnect)
 server.event_handler("disconnect", OnDisconnect)
 
 --[[ TODO: Fix&optimalize or depricate ]]

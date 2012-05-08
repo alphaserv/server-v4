@@ -1,4 +1,4 @@
-package("modes", package.seeall)
+module("modes", package.seeall)
 
 maps = {
 	["xenon"] = {crc = "3864afeb2ac9e9c7347634aca595901a4f134cbd151dbdc6"},
