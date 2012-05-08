@@ -35,6 +35,15 @@ server.event_handler("mapvote", function(cn, map, mode)
 	
 	local user = user_from_cn(cn)
 	
+	if user.map_suggested then
+		messages.load("maprotation", "cannot_vote", {default_type = "warning", default_message = "red<Cannot vote for that map: > orange<%(1)s>" })
+			:format("You can only vote for a map once", cn, map, mode)
+			:send(cn, true)		
+		return -1
+	end
+	
+	user.map_suggested = true
+	
 	if not suggestions[mode..":"..map] then
 		suggestions[mode..":"..map] = 0
 	end

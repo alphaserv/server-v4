@@ -121,6 +121,7 @@ server.event_handler("mapchange", function(map, mode)
 	--clear voteds
 	for cn, player in pairs(alpha.user.users) do
 		player.has_voted = false
+		user.map_suggested = false
 	end
 end)
 
