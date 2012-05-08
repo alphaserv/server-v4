@@ -8,6 +8,7 @@
 /0
 /1
 .ignore
+*.ignore
 /bin/monitor
 /bin/sauer_server
 /lib/*
