@@ -1,16 +1,16 @@
 return class.new(messages.theme_obj, {
 	type_prefixes = {
-		info = "green<[",
-		notice = "blue<[",		
-		warning = "red<[",		
-		debug = "magenta<[",		
-		error = "red<[",		
+		info = " green<[ ",
+		notice = " blue<[ ",		
+		warning = " red<[ ",		
+		debug = " magenta<[ ",		
+		error = " red<[ ",		
 		
 		default = "info"
 	},
 	
 	type_postfixes = {
-		info = "]> ",
+		info = " ]> ",
 		
 		default = "info"
 	},

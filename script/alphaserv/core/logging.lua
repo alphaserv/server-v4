@@ -229,7 +229,7 @@ function debug(level, text)
 		
 		--message module loaded
 		elseif alpha.init_done and messages and messages.load then
-			messages.load("DEBUG", "debug_"..name, {default_type = "debug", default_message = "DEBUG %(1)s(%(2)s): %(3)s"})
+			messages.load("DEBUG", "debug_"..name, {default_type = "debug", default_message = "log_%(1)s(%(2)s): %(3)s"})
 				:format(name, level, text)
 				:send()
 

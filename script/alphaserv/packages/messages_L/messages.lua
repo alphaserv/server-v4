@@ -77,7 +77,7 @@ end)
 
 message_object = class.new(nil, {
 	message_string = "",
-	message_type = "info",
+	message_type = "",
 	formated_message = false,
 	use_irc = false,
 	
@@ -85,10 +85,11 @@ message_object = class.new(nil, {
 	module_name = "",
 	
 	from_data = function(self, data)
-		self.name = data.name
+		self.message_name = data.name
 		self.module_name = data.module
 		self.message_string = data.message
 		self.use_irc = data.use_irc and true
+		self.message_type = data.message_type or "info"
 		
 		return self
 	end,
@@ -243,7 +244,7 @@ function load(module, name, default)
 			if result:num_rows() < 1 then
 				alpha.db:query("INSERT INTO messages (name, module, message) VALUES (?, ?, ?)", name, module, default.default_message)
 			
-				row = {name = name, module = module, message = default.default_message}
+				row = {name = name, module = module, message = default.default_message, message_type = default.default_type}
 			else
 				row = result:fetch()[1]
 			end
@@ -259,7 +260,7 @@ function load(module, name, default)
 			end
 			
 			if not cache[module.."::"..name] then
-				cache[module.."::"..name] = {message = default.default_message, module = module, name = name, use_irc = default.use_irc}
+				cache[module.."::"..name] = {message = default.default_message, module = module, name = name, use_irc = default.use_irc, message_type = default.default_type}
 			
 				local file = io.open("conf/messages.lua", "w")
 	
