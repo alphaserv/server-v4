@@ -7,6 +7,7 @@ return {
 	load = {
 		"maps.lua",
 		"core.lua",
+		"suggestions.lua"
 	}
 }
 	

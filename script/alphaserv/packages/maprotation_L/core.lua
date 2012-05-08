@@ -119,7 +119,7 @@ server.event_handler("mapchange", function(map, mode)
 	intermission = false
 	
 	--clear voteds
-	for cn, player in pairs(alpha.players.players) do
+	for cn, player in pairs(alpha.user.users) do
 		player.has_voted = false
 	end
 end)
@@ -157,6 +157,16 @@ default_map_provider = class.new(map_provider, {
 		
 		return maps[i]
 	end,
+	
+	has_map = function(self, mode, map)
+		for _, mapname in pairs(modes.modes[mode]) do
+			if mapname == map then
+				return true
+			end
+		end
+		
+		return false
+	end
 })
 
 add_map_provider("default", default_map_provider)
@@ -181,6 +191,10 @@ default_intermission_mode_obj = class.new(intermission_mode_obj, {
 	--on mapchange not done by map provider
 	cancel = function(self)
 		self.cancelled = true
+	end,
+	
+	mapvote = function(self, user, map, mode, count)
+		return false
 	end,
 })
 

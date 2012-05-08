@@ -1,6 +1,8 @@
 
 module("maprotation.mapbattle", package.seeall)
 
+local allowed_gamemodes = alpha.settings.new_setting("mapbattle_ignore_novote", true , "just pick a random map when no suggestions were made.")
+
 votes = {}
 maps = {}
 
@@ -12,8 +14,8 @@ mapbattle_intermission_mode_obj = class.new(maprotation.default_intermission_mod
 		
 		i = i or 1
 		
-		map = map or maprotation.get_map_provider():get_map(server.gamemode)
-		map2 = map2 or maprotation.get_map_provider():get_map(server.gamemode)
+		map = map or maps[1] or maprotation.get_map_provider():get_map(server.gamemode)
+		map2 = map2 or maps[2] or maprotation.get_map_provider():get_map(server.gamemode)
 
 		if i == 1 then
 			messages.load("mapbattle", "vote", {default_type = "info", default_message = "blue<mapbattle> green<%(1)s> yellow<VS> green<%(2)s> blue<use> green<#1> and green<#2> to vote!" })
@@ -40,7 +42,8 @@ mapbattle_intermission_mode_obj = class.new(maprotation.default_intermission_mod
 						messages.load("mapbattle", "random", {default_type = "info", default_message = "green<SUDDEN DEATH> orange<failed> blue<picking random map>" })
 							:format(map, map2, votes[1], votes[2])
 							:send()
-					
+
+						maps = {}					
 						
 						maprotation.get_map_provider():change_map(map, server.gamemode)
 					end
@@ -51,6 +54,8 @@ mapbattle_intermission_mode_obj = class.new(maprotation.default_intermission_mod
 							:format(map2, map, server.gamemode)
 							:send()
 
+						maps = {}
+						
 						maprotation.get_map_provider():change_map(map2, server.gamemode)
 					elseif votes[1] > votes[2] then
 
@@ -58,6 +63,7 @@ mapbattle_intermission_mode_obj = class.new(maprotation.default_intermission_mod
 							:format(map, map2, server.gamemode)
 							:send()
 
+						maps = {}
 						maprotation.get_map_provider():change_map(map, server.gamemode)
 					end
 				end
@@ -65,9 +71,44 @@ mapbattle_intermission_mode_obj = class.new(maprotation.default_intermission_mod
 		end)
 	end,
 	
+	mapvote = function(self, user, map, mode, count)
+		if maps[1] and maps[2] then
+			messages.load("maprotation", "cannot_vote", {default_type = "warning", default_message = "red<Cannot vote for that map: > orange<%(1)s>" })
+				:format("already 2 maps suggested for a mapbattle", user.cn, map, mode)
+				:send(cn, true)
+			
+			return true
+		end
+		
+		if maps[1] == map then
+			messages.load("maprotation", "cannot_vote", {default_type = "warning", default_message = "red<Cannot vote for that map: > orange<%(1)s>" })
+				:format("that map is already suggested", user.cn, map, mode)
+				:send(cn, true)
+			
+			return true
+		end
+		
+		
+		if mode ~= server.gamemode then
+			--TODO
+		end
+		
+		if maps[1] then
+			maps[2] = map
+		else
+			maps[1] = map
+		end
+		
+		messages.load("maprotation", "suggest", {default_type = "info", default_message = "green<suggestion accepted>" })
+			:format(cn, map, mode)
+			:send(cn, true)
+		
+		return true
+	end,
+	
 	cancel = function(self)
 		self.cancelled = true
-		
+		maps = {}
 	end,
 })
 
