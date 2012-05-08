@@ -3,6 +3,77 @@ module("messages", package.seeall)
 
 local you_replacing = alpha.settings.new_setting("You_replacing", true, "Replace the name of a player with you")
 local backend = alpha.settings.new_setting("message_backend", "file", "The backend to use for messages, can be: file or db.")
+local message_theme = alpha.settings.new_setting("message_theme", "default", "The theme file to load.")
+
+theme_obj = class.new(nil, {
+	type_prefixes = {
+		info = "blue<[info]> ",
+		notice = "blue<[info]> ",		
+		warning = "red<[info]> ",		
+		debug = "magenta<[info]> ",		
+		error = "red<[error]> ",		
+		
+		default = "info"
+	},
+	
+	private_prefix = function(self)
+		return "blue<private:> "
+	end,
+	
+	prefix = function(self, module_name, message_type, messagename, private, msg)
+		local new_msg = ""
+		
+		if private then
+			new_msg = self:private_prefix()
+		end
+		
+		if not self.type_prefixes[message_type] then
+			message_type = self.type_prefixes.default
+		end
+		
+		new_msg = new_msg .. self.type_prefixes[message_type] or "red<[!error!]> "
+		
+		return new_msg .. msg
+	end
+})
+
+local loaded = {default = theme_obj}
+local theme = theme_obj()
+
+function set_theme(name)
+	if not loaded[name] then
+		error("Could not find theme: %(1)q" % {tostring(name)})
+	end
+	
+	theme = loaded[name]()
+end
+
+function add_theme(name, obj)
+	loaded[name] = obj
+end
+
+server.event_handler("pre_started", function()
+	local filesystem = require "filesystem"
+	
+	local function load_themes(path)
+		for filetype, filename in filesystem.dir(path) do
+		
+			local fullfilename = path .. "/" .. filename
+		
+			if (filetype == filesystem.DIRECTORY) and (filename ~= "." and filename ~= "..") then
+				load_themes(fullfilename)
+			elseif (filetype == filesystem.FILE or filetype == filesystem.UNKNOWN) then
+				add_theme(filename, dofile(fullfilename))
+			end
+		end
+	end
+	
+	load_themes(alpha.package.package_path.."/messages_L/themes")
+	
+	if message_theme:get() then
+		set_theme(message_theme:get())
+	end
+end)
 
 message_object = class.new(nil, {
 	message_string = "",
@@ -45,6 +116,8 @@ message_object = class.new(nil, {
 		data = string.gsub(data, "\\", "&09;")
 		data = string.gsub(data, ">", "&10;")
 		data = string.gsub(data, "<", "&11;")
+		data = string.gsub(data, "\n", "&12;")
+		data = string.gsub(data, "\r", "&13;")
 	
 		return data
 	end,
@@ -72,6 +145,8 @@ message_object = class.new(nil, {
 		data = string.gsub(data, "%&09;", "\\")
 		data = string.gsub(data, "%&10;", ">")
 		data = string.gsub(data, "%&11;", "<")
+		data = string.gsub(data, "%&12;", "\\n")
+		data = string.gsub(data, "%&13;", "\\r")
 	
 		return data
 	end,
@@ -90,6 +165,7 @@ message_object = class.new(nil, {
 	end,
 	
 	prefix = function(self, msg)
+
 		if self.message_type == "info" then
 			if true then
 				return "blue<[info] >"..msg
@@ -102,7 +178,7 @@ message_object = class.new(nil, {
 	color = function(self, to, is_private)
 		local msg = self.formated_message or self.message_string
 		
-		msg = self:prefix(msg)
+		msg = theme:prefix(self.module_name, self.message_type, self.message_name, is_private, msg)
 		
 		msg = string.gsub(msg, "red<(.-)>", function (string) return color.red(string) end)
 		msg = string.gsub(msg, "white<(.-)>", function (string) return color.white(string) end)
