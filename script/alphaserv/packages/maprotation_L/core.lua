@@ -34,6 +34,10 @@ function set_map_provider(name)
 	current_map_provider = providers[name]
 end
 
+function get_map_provider()
+	return current_map_provider
+end
+
 function get_intermissionmode_obj()
 	if not current_intermissionmode then
 		error("No intermissionmode set")
@@ -113,6 +117,11 @@ server.event_handler("mapchange", function(map, mode)
 	end
 	
 	intermission = false
+	
+	--clear voteds
+	for cn, player in pairs(alpha.players.players) do
+		player.has_voted = false
+	end
 end)
 
 server.event_handler("intermission", function()
