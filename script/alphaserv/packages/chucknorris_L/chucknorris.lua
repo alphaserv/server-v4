@@ -11,7 +11,7 @@ function update_joke()
     http.client.get("http://api.icndb.com/jokes/random", function(body, status)
         
         if not body then
-            error("Failed to download the global ban list: " .. status)
+            error("Failed to download the global ban list: " .. table_to_string(status))
         end
         
         local data = Json.Decode(body)
