@@ -110,7 +110,7 @@ message_object = class.new(nil, {
 		data = string.gsub(data, "|", "&02;")
 		data = string.gsub(data, "%[", "&03;")
 		data = string.gsub(data, "%]", "&04;")
-		data = string.gsub(data, ";", "&05;")
+		--data = string.gsub(data, ";", "&05;")
 		data = string.gsub(data, "\f", "&06;")
 		data = string.gsub(data, "}", "&07;")
 		data = string.gsub(data, "{", "&08;")
@@ -139,7 +139,7 @@ message_object = class.new(nil, {
 		data = string.gsub(data, "%&02;", "|")
 		data = string.gsub(data, "%&03;", "[")
 		data = string.gsub(data, "%&04;", "]")
-		data = string.gsub(data, "%&05;", ";")
+		--data = string.gsub(data, "%&05;", ";")
 		data = string.gsub(data, "%&06;", "\\f")
 		data = string.gsub(data, "%&07;", "}")
 		data = string.gsub(data, "%&08;", "{")
@@ -148,6 +148,7 @@ message_object = class.new(nil, {
 		data = string.gsub(data, "%&11;", "<")
 		data = string.gsub(data, "%&12;", "\\n")
 		data = string.gsub(data, "%&13;", "\\r")
+
 	
 		return data
 	end,
