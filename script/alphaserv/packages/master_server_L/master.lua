@@ -3,7 +3,11 @@ module("master.server", package.seeall)
 require "Json"
 --server authentication keys
 
-local server_secrets = alpha.settings.new_setting("server_secrets", {AAAAAAAAA = true}, "The secrets of the servers")
+local server_secrets = alpha.settings.new_setting("server_secrets", {[9999] = "AAAAAAAAA"}, "The secrets of the servers")
+
+local function generate_login_key(master_msg, server_id, server_key)
+	return crypto.tigersum(string.format("%i %s %s", server_id, master_msg, server_key))
+end
 
 server_obj = class.new(nil, {
 	server = nil,
@@ -36,20 +40,24 @@ server_obj = class.new(nil, {
 
 accepted_obj = class.new(nil, {
 	connection = nil,
-	authed = false,
 	remote = nil,
+	rand_id = 0,
+	auth_status = 0, --0 = not authed
+					 --1 = sending authrequest
+					 --2 reserved
+					 --3 = authed
 	
 	__init = function(self, connection, remote)
 		self.connection = connection
 		self.remote = remote
-
-		server.sleep(1000, function()
-			self:send("req_serverauth")
-		end)
 	end,
 	
 	send = function(self, message, ...)
 		message = message % {...} 
+		
+		if message == "" then
+			return
+		end
 		
 		print(string.format("[Client] : (%s:%s) | sending: %s", self.remote.ip, self.remote.port, message))
 		self.connection:async_send(message.."\n", function(success) end)
@@ -60,134 +68,89 @@ accepted_obj = class.new(nil, {
 	end,
 	
 	send_serverlist = function(self)
-		for i, server in pairs(master.servers) do
-			self:send("addserver %(1)s %(2)s", server.ip, server.port)
+		for i, server in pairs(master.servers or {ip = "localhost; echo [error :(]; echo ", port= "0"}) do
+			self:send("addserver %(1)s %(2)i", server.ip, server.port)
 		end
 	end,
 	
 	read = function(self)
 		self.connection:async_read_until("\n", function(data)
-			if data then
+			if data and data ~= "" then
+				print(string.format("[Client] : (%s:%s) | reading: %s", self.remote.ip, self.remote.port, data))
 				
-				if data == "" then return end
+				if data[1] ~= "[" and data[1] ~= "{" then
+					--strip \n
+					data = data:gsub("\n", "")
+
+					arguments = data:split(" ")
 				
-				--strip \n
-				data = data:gsub("\n", "")
-			
-				arguments = data:split(" ")
+					--process the data
+					print("calling: %(1)s" % {arguments[1]})
 				
-				--process the data
-				print("calling: %(1)s" % {arguments[1]})
-				
-				--send serverlist
-				if arguments[1] == "list" then
-					self:send_serverlist()
-					self:close_current()
-					return
-				
-				--send list of reserved names
-				elseif arguments[1] == "names" then
-					local msg = Json.Encode(alpha.db:query("SELECT name FROM names"):fetch())
-					msg = msg:gsub("\n", "\\n")
-					self:send("namelist %(1)s", msg)
-				
-				--send list of clantags
-				elseif arguments[1] == "clans" then
-					local msg = Json.Encode(alpha.db:query("SELECT tag FROM clans"):fetch())
-					msg = msg:gsub("\n", "\\n")
-					self:send("clanlist %(1)s", msg)
-				
-				--login request
-				elseif arguments[1] == "auth" then
-					--auth secret cn session_id hashed_password name
-				
-					local secret_table = server_secrets:get()
-				
-					if not secret_table[arguments[2]] then
-						self:send("login_fail %(1)i incorrect secret", arguments[4])
-					else
-				
-						local res = alpha.db:query([[
-							SELECT
-								users.id,
-								users.name,
-								users.pass,
-								users.email
-							FROM
-								users,
-								names
-							WHERE
-								names.user_id = users.id
-							AND
-								names.name = ?
-							]], arguments[6])--name
+					--send serverlist
+					if arguments[1] == "list" then
+						self:send_serverlist()
+						self:close_current()
+						return
+					elseif arguments[1] == "regserv" then
+						--TODO
+					end
+				else
+					local buff = Json.Decode(data)
 					
-						if res:num_rows() < 1 then
-							self:send("login_fail %(1)i unkown name", arguments[4])
-						elseif res:num_rows() > 1 then --should not be possible
-							self:send("login_fail %(1)i ambigious", arguments[4])
-						else
-							local row = res:fetch()
-							
-							row = row[1]
+					local sendbuff = {}
+					
+					local i = 0
+					local function send(msg)
+						i = i + 1
+						sendbuff[i] = msg
 						
-							if crypto.tigersum(string.format("%i %i %s", arguments[3], arguments[4], row.pass)) == arguments[5] then
+						print("Send: "..table_to_string(msg))
+					end
 					
-								self:send("login_success %(1)i %(2)s", arguments[4],  "aaa")
+					local id
+					for i, msg in pairs(buff) do
+						if msg[1] == "id" then
+							id = msg[2]
+						elseif not id then
+							self:error("protocol", "malformated message!")
+							break
+						elseif msg[1] == "init" then
+							send({"serverauth", self.rand_id})
+							break --we do not allow other messages afterwards
+						elseif msg[1] == "serverauth" then
+							if msg[2] ~= generate_login_key(self.rand_id, id, server_secrets:get()[id]) then
+								self:error("serverauth", "auth failed!")
 							else
-								self:send("login_fail %(1)i incorrect password", arguments[4])
+								send({"serverauth_success", "Welcome"})
+								self.auth_status = 3
+							end
+						elseif self.auth_status ~= 3 then
+							self:error("protocol", "unauthed message!")
+							break
+						elseif msg[1] == "names" then
+							send({"namelist", {"killme_nl"}})
+						elseif msg[1] == "clans" then
+							send({"clanlist", {"_nl"}})
+						elseif msg[1] == "login" then
+							local user = {{id = 0, name = "killme_nl", pass = "TEST" }}
+							
+							if msg[4] == crypto.tigersum(string.format("%i %i %s", msg[3], msg[2], user[1].pass)) then
+								send({"login", msg[2], true, "aaa", {email = "a@b.com"}})
+							else
+								send({"login", msg[2], false})
 							end
 						end
 					end
-				
-				elseif arguments[1] == "reqauth" and false then
+					
+					self:send(
+						Json.Encode(sendbuff)
+					)
 										
-						-- ReqAuth Handler
-						if string.match(data,"reqauth %d+ %w+ .*") then
-							local arguments = _.to_array(string.gmatch(data, "[^ \n]+"))
-							local request_id, name, domain = tonumber(arguments[2]), arguments[3]:lower(), (arguments[4] or "")
-							if not users[domain] then conoutf.debug(string.format("[Auth]   | (%s:%s) : auth nÂ°%s: Domain '%s' doesn't exist!", remote_endpoint.ip, remote_endpoint.port, request_id, domain)) return end
-							if not users[domain][name] or not users[domain][name][1] then conoutf.debug(string.format("[Auth]   | (%s:%s) : auth nÂ°%s: User '%s' doesn't exist in domain '%s' !", remote_endpoint.ip, remote_endpoint.port, request_id, name, domain)) return end
-							challenges[request_id] = generate_challenge(users[domain][name][1])
-							local challenge_str = challenges[request_id]:to_string()
-							conoutf.debug("[Auth]   | (%s:%s) : Attempting auth nÂ°%d for %s@%s", remote_endpoint.ip, remote_endpoint.port, request_id, name, domain or '')
-							sendmsg(string.format("chalauth %i %s", request_id, challenge_str))
-						end
+					buff = nil
+					sendbuff = nil
+				end
 		
-						-- ConfAuth Handler
-						if string.match(data, "confauth %d+ .+") then
-							local arguments = _.to_array(string.gmatch(data, "[^ \n]+"))
-							local request_id, answer = tonumber(arguments[2]), arguments[3]
-							if not challenges[request_id] then return end
-							local challenge_expected_answer = challenges[request_id]:expected_answer(answer)
-							if challenge_expected_answer then 
-								conoutf.debug(string.format("[Auth]   | (%s:%s) : Succeded auth nÂ°%d with answer %s", remote_endpoint.ip, remote_endpoint.port, request_id, answer))
-								sendmsg(string.format("succauth %d", request_id))
-							else
-								conoutf.debug(string.format("[Auth]   | (%s:%s) : Failed auth nÂ°%d with answer %s", remote_endpoint.ip, remote_endpoint.port, request_id, answer))
-								sendmsg(string.format("failauth %d", request_id))
-							end
-							table.remove(challenges, request_id)
-						end
-		
-						-- QueryId Handler
-						if string.match(data, "QueryId %d+ %w+ .*") then
-							local arguments = _.to_array(string.gmatch(data, "[^ \n]+"))
-							local request_id, name, domain = tonumber(arguments[2]), arguments[3]:lower(), (arguments[4] or "")
-							if not users[domain] then 
-								conoutf.debug(string.format("[Auth]   | (%s:%s) : auth nÂ°%s: Domain '%s' doesn't exist!", remote_endpoint.ip, remote_endpoint.port, request_id, domain))
-								sendmsg(string.format("DomainNotFound %d", request_id))
-								return 
-							end
-							if not users[domain][name] or not users[domain][name][1] then
-								conoutf.debug(string.format("[Auth]   | (%s:%s) : auth nÂ°%s: User '%s' doesn't exist in domain '%s' !", remote_endpoint.ip, remote_endpoint.port, request_id, name, domain))
-								sendmsg(string.format("NameNotFound %d", request_id))
-								return 
-							end
-							conoutf.debug(string.format("[Auth]   | (%s:%s) : auth nÂ°%s: User '%s' found in domain '%s' with '%s' rights", remote_endpoint.ip, remote_endpoint.port, request_id, name, domain, users[domain][name][2]))
-							sendmsg(string.format("FoundId %d %s", request_id, users[domain][name][2]))
-						end
-					end
 				self:read()
    		    else
    		        self:error("read", "data is empty")

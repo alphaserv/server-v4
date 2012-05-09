@@ -1,5 +1,7 @@
 module("ext_auth", package.seeall)
 
+--local override_privs = alpha.settings.new_setting("user_rules", {""}, "Overriding rules for as database authed users.")
+
 auth_obj = class.new(auth.auth_object, {
 	
 	clantags = {},
@@ -7,24 +9,22 @@ auth_obj = class.new(auth.auth_object, {
 	
 	init_clantags = function(self)
 		self.clantags_loaded = true
-		as_master.client.get_clans(function(tags)
-			for i, tag in pairs(tags) do
-				table.insert(self.clantags, tag)
-			end
-		end)
+		as_master.client.send_message("clans")
+		as_master.client.handlers.add_clantag = function(tag)
+			table.insert(self.clantags, tag)
+		end
 		
 		self.init_clantags = function() end
 	end,
 	
 	init_names = function(self)
 		self.names_loaded = true
-
-		as_master.client.get_names(function(names)
-			for i, name in pairs(names) do
-				self.names[name] = true
-			end
-		end)		
-
+		
+		as_master.client.send_message("names")
+		as_master.client.handlers.add_name = function(name)
+			self.names[name] = true
+		end
+		
 		self.init_names = function() end
 	end,
 
@@ -103,11 +103,10 @@ auth_obj = class.new(auth.auth_object, {
 	end,
 
 	auth = function(self, user, hash)
-		as_master.client.try_login(user, hash, function(user, success, key, extra)
+	
+		user.finish_auth = function(user, success, key, extra)
 			
 			log_msg(LOG_INFO, "Auth resulted into: %(1)s" % {tostring(success) or "-?-", tostring(key) or "-?-"})
-			
-			server.msg("Success = "..tostring(success))
 			
 			if success then
 				user.authedwith = "as_ext_auth"
@@ -119,11 +118,14 @@ auth_obj = class.new(auth.auth_object, {
 				user:remove_speclock("ext:protect:clantag")
 				user:remove_speclock("ext:protect:name")
 				user:check_locks()
-				user:msg("Authentication success!")
+				user:msg("Authentication successed!")
 			else
 				user:msg("Authentication failed!")
 			end
-		end)
+		end
+		
+		--auth secret cn session_id hashed_password name
+		as_master.client.send_message("auth "..as_master.client.key:get().." "..user.cn.." "..user.sid.." "..hash.." "..user:name())
 		
 		return true, true, {"Verifying ..."}
 	end,
@@ -131,3 +133,13 @@ auth_obj = class.new(auth.auth_object, {
 
 
 auth.add_module("dbauth", auth_obj())
+
+as_master.client.handlers.auth = function(result, session_id, ...)
+	for cn, user in pairs(alpha.user.users) do
+		if user.sid == session_id then
+			user:finish_auth(result, ...)			
+			break
+		end
+	end
+end
+

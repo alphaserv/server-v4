@@ -3,6 +3,8 @@ require "Json"
 
 local db_settings
 
+--NOTE: some core variables like db_* need 2 restarts before having effect
+
 function reload_server_config()
 	db_settings = {}
 	local server_id = alpha.settings.get("server_id"):get()
