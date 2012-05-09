@@ -155,7 +155,7 @@ alpha.db = {
 }
 
 if not alpha.standalone then
-	server.event_handler("started", function()
+	server.event_handler("config_loading", function()
 		alpha.db:open("mysql")
 		alpha.db:connect()
 		db_load()

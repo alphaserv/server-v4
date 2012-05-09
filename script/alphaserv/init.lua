@@ -1,6 +1,6 @@
 alpha = {}
 alpha.fn = {} --extern accesable functions
-alpha.spamstartup = false --Default: false
+alpha.spamstartup = true --Default: false
 alpha.init_done = false
 alpha.color = true
 
@@ -9,6 +9,7 @@ geoip = require("geoip")
 require "language.init"
 
 local trigger_start = server.create_event_signal("pre_started")
+local trigger_config_loading = server.create_event_signal("config_loading") --time to override our config with by example, database stuff
 local trigger_config = server.create_event_signal("config_loaded")
 
 if geoip.load_geoip_database("./share/GeoIP.dat") then
@@ -51,6 +52,7 @@ end
 --force proper configuration scheme
 alpha.settings.write("conf/core.lua")
 
+--loaded core config
 trigger_config()
 
 --generate default config if file not found
@@ -58,8 +60,18 @@ if server.file_exists("conf/modules.lua") then
 	alpha.load.file("conf/modules.lua", true)
 end
 
+--override stuff
+trigger_config_loading()
+
 --force proper configuration scheme
 alpha.settings.write("conf/modules.lua")
+
+--loaded all modules
+trigger_start()
+server.cancel_event_signal("config_loading")
+server.cancel_event_signal("pre_started")
+server.cancel_event_signal("config_loaded")
+alpha.init_done = true
 
 server.event_handler("started", function()
 	local mem = gcinfo()
@@ -67,8 +79,3 @@ server.event_handler("started", function()
 	alpha.log.message("=> memory usage: %iKb (%iKb on init) diff: %iKb", mem, initmem, mem - initmem)
 	print(string.format("=> memory usage: %iKb (%iKb on init) diff: %iKb", mem, initmem, mem - initmem))
 end)
-
-trigger_start()
-server.cancel_event_signal("pre_started")
-server.cancel_event_signal("config_loaded")
-alpha.init_done = true

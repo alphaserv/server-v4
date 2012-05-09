@@ -222,7 +222,7 @@ function debug(level, text)
 		local msg = message_to("DEBUG %s(%i): %s", "debug", name, level, text)
 		
 		if not alpha.init_done and alpha.spamstartup then
-			print(msg)
+			print(pack(msg:gsub("(\n)$", ""))[1])
 		
 		elseif level == debuglevels.ERROR then
 			print("ERROR: "..text)
