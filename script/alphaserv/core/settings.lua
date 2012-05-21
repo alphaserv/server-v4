@@ -88,15 +88,37 @@ writers = {
 	end,
 	
 	["table"] = function (item, level)
+		local isindex = function(k) 
+			if type(k) == "number" and k > 0 then
+				if math.floor(k) == k then
+					return true
+				end
+			end
+			return false
+		end
+		
+		local need_keys = function(t)
+			for k,v in pairs(t) do
+				if not isindex(k) then
+					return true
+				end
+			end
+			return false
+		end
+		
+		local require_keys = need_keys(item)		
 		local string = ""
 		
 		string = string .. "{\n"
 		
 		for k, v in pairs(item) do
 			string = string .. writetabs(level+1)
-			string = string .. "["
-			string = string .. serialize_data(k, level + 1)
-			string = string .. "] = "
+			
+			if require_keys then
+				string = string .. "["
+				string = string .. serialize_data(k, level + 1)
+				string = string .. "] = "
+			end
 			
 			string = string	.. serialize_data(v, level + 1)
 			
