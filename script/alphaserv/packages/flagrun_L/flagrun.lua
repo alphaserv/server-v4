@@ -5,7 +5,7 @@ local timeFlagC1 = {}
 local isValid1 = {}
 local tRun1 = {}
 
-function isValid1['taking_of_flag'](cn)
+function isValid1.taking_of_flag(cn)
 
 messages.load("flagrun", "take", {default_type = "info", default_message = "Player %(1)s has picked up the flag for team: %(2)s"}):format (server.player_displayname(cn), server.player_team(cn)):send()
 
@@ -16,7 +16,7 @@ tRun1['server.player_team(cn)'] = server.uptime()
 
 end
 
-function isValid1['droping_flag'](cn)
+function isValid1.droping_flag(cn)
 
 messages.load("flagrun", "drop", {default_type = "info", default_message = "Player %(1)s has lost the flag for team: %(2)s"})
 :format (server.player_displayname(cn), server.player_team(cn))
@@ -27,7 +27,7 @@ messages.load("flagrun", "drop", {default_type = "info", default_message = "Play
 
 end
 
-function isValid1['scoring_of_flag'](cn)
+function isValid1.scoring_of_flag(cn)
 
 	flagC1.cn = false
 	local i = server.uptime() -timeFlagC1.cn
@@ -41,7 +41,7 @@ messages.load("flagrun", "score", {default_type = "info", default_message = "Pla
 
 end
 
-function isValid['returned'](cn)
+function isValid1.returned(cn)
 
 messages.load("flagrun", "return", {default_type = "info", default_message = "Player %(1)s has returned the flag for his team: %(2)s"})
 :format (server.player_displayname(cn), server.player_team(cn))
@@ -52,7 +52,7 @@ messages.load("flagrun", "return", {default_type = "info", default_message = "Pl
 
 end
 
-function isValid['reset_of_flag'](cn)
+function isValid1.reset_of_flag(cn)
 
 messages.load("flagrun", "reset", {default_type = "info", default_message = "The flag has been reseted!"})
 :send()
@@ -63,8 +63,8 @@ messages.load("flagrun", "reset", {default_type = "info", default_message = "The
 end
 
 
-server.event_handler("takeflag", isValid1['taking_of_flag'])
-server.event_handler("dropflag", isValid1['droping_flag'])
-server.event_handler("scoreflag", isValid1['scoring_of_flag'])
-server.event_handler("returnflag", isValid['returned'])
-server.event_handler("restflag", isValid['reset_of_flag'])
+server.event_handler("takeflag", isValid1.taking_of_flag)
+server.event_handler("dropflag", isValid1.droping_flag)
+server.event_handler("scoreflag", isValid1.scoring_of_flag)
+server.event_handler("returnflag", isValid1.returned)
+server.event_handler("restflag", isValid1.reset_of_flag)
