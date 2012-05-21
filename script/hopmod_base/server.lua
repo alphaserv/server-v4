@@ -1,5 +1,6 @@
 server = {}
 
+core.overrides = {}
 local properties = core.vars
 
 setmetatable(server,{
@@ -13,6 +14,8 @@ setmetatable(server,{
             if type(value) == "function" then
                 value = value()
             end
+		elseif core.overrides[key] then
+			return core.overrides[key]
         end
         
         return value

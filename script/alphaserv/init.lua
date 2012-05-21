@@ -22,6 +22,16 @@ else
 	end
 end
 
+if geoip.load_geocity_database("./share/GeoLiteCity.dat") then
+	print(" |sucessfully loaded geocity db file")
+else
+	if alpha.color then
+		print(string.char(27).."[31m | could not load geocity db file"..string.char(27).."[0m")
+	else
+		print(" | could not load geocity db file")
+	end
+end
+
 alpha.module_prefix = "script/alphaserv/" --path to this directory
 alpha.module_extention = ".lua" ----extention of the files, deprecated
 
