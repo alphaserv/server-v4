@@ -62,17 +62,27 @@ if not alpha.standalone then
 		local result, messages = checkall("auth", user, password)
 			
 		log_msg(LOG_INFO, "%(1)s (%(2)i) tried to auth (result=%(3)i)" % { user:name(), user.cn, tonumber(result or 0)or 0 })
-			
+		
+		if type (messages) ~= "table" then
+			messages = {messages}
+		end
+		
 		if result then
-			--TODO: use message framework
-			server.player_msg(user.cn, "authed")
+			messages.load("auth", "success", { default_message = "green<name<%(1)i>> authenticated" })
+				:format(user.cn)
+				:send()
+
 			user:check_locks()
 		else
-			server.player_msg(user.cn, "could not log you in")
+			messages.load("auth", "fail", { default_message = "Could not authenticate green<name<%(1)i>>" })
+				:format(user.cn)
+				:send(user.cn, true)
 		end
 			
 		for i, msg in pairs(messages) do
-			server.player_msg(user.cn, msg)
+			messages.load("auth", "result", { default_message = "auth: %(1)s" })
+				:unsecaped_format(msg)
+				:send(user.cn, true)
 		end
 	end)
 	

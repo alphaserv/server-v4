@@ -166,21 +166,29 @@ message_object = class.new(nil, {
 		return self
 	end,
 	
-	prefix = function(self, msg)
-
-		if self.message_type == "info" then
-			if true then
-				return "blue<[info] >"..msg
-			end
-		end
-		
-		return self
-	end,
-	
 	color = function(self, to, is_private)
 		local msg = self.formated_message or self.message_string
 		
 		msg = theme:prefix(self.module_name, self.message_type, self.message_name, is_private, msg)
+
+		msg = string.gsub(msg, "name<[0-9]->(.-)|(.-)|(.-)|", function(cn, seperator, you_text, name_text)
+			if tonumber(cn) == to and you_replacing:get() then
+				return "name<"..cn..">"..seperator..you_text
+			else
+				return "name<"..cn..">"..seperator..name_text
+			end
+		end)
+
+		msg = string.gsub(msg, "name<([\-0-9]-)>", function(cn)
+			cn = tonumber(cn)
+			if cn == to and you_replacing:get() then
+				return "you"
+			elseif server.valid_cn(cn) then
+				return server.player_displayname(cn)
+			else
+				return "?unkown?"
+			end
+		end)
 		
 		msg = string.gsub(msg, "red<(.-)>", function (string) return color.red(string) end)
 		msg = string.gsub(msg, "white<(.-)>", function (string) return color.white(string) end)
@@ -190,24 +198,6 @@ message_object = class.new(nil, {
 		msg = string.gsub(msg, "green<(.-)>", function (string) return color.green(string) end)
 		msg = string.gsub(msg, "orange<(.-)>", function (string) return color.orange(string) end)
 		msg = string.gsub(msg, "grey<(.-)>", function (string) return color.grey(string) end)
-		
-		msg = string.gsub(msg, "name<(.-)>(.-)|(.-)|(.-)|", function(cn, seperator, you_text, name_text)
-			if tonumber(cn) == to and you_replacing:get() then
-				return "name<"..cn..">"..seperator..you_text
-			else
-				return "name<"..cn..">"..seperator..name_text
-			end
-		end)
-
-		msg = string.gsub(msg, "name<(.-)>", function(cn)
-			if tonumber(cn) == to and you_replacing:get() then
-				return "you"
-			elseif server.valid_cn(cn) then
-				return server.player_displayname(cn)
-			else
-				return "unkown"
-			end
-		end)
 		
 		return self:unescape(msg)
 	end,
@@ -239,7 +229,13 @@ local cache = {}
 function load(module, name, default)
 	if not cache[module.."::"..name] then
 		local backend = backend:get()
-		if bakend == "db" then
+		if backend == "db" and not alpha.db then
+			log_msg(LOG_ERROR, "To use the database backend, please load the database package. Using fallback file backend")
+			bakend = "file"
+		end
+		
+		if backend == "db" then
+
 			local result = alpha.db:query("SELECT id, name, module, message FROM messages WHERE name = ? AND module = ?;", name, module)
 		
 			if result:num_rows() < 1 then
@@ -278,8 +274,3 @@ function load(module, name, default)
 	
 	return message_object():from_data(cache[module.."::"..name])
 end
-
-server.event_handler("connect", function(cn)
-	messages.load("messages", "connect", {default_type = "info", default_message = "green<Welcome> blue<on yet another alphaserver.> green<V4 version>"})
-		:send({cn}, true)
-end)

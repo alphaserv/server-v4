@@ -198,3 +198,8 @@ function _if(expr, true_value, false_value)
         return false_value
     end
 end
+
+function server.valid_cn(cn)
+    local cn = tonumber(cn)
+    return server.player_sessionid(cn or -1) ~= -1 and not server.player_is_spy(cn or -1)
+end

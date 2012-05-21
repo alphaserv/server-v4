@@ -1,9 +1,7 @@
 
 return {
 	name = "Message system",
-	dependics = {
-		name = "database"
-	},
+	dependics = {},
 	load = {
 		"messages.lua"
 	}

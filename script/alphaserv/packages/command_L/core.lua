@@ -137,7 +137,7 @@ events.on_text = server.event_handler("text", function(cn, text)
 				:format(unpack(result[3]))
 				:send(cn, true)
 		else
-			local message = messages.load("command", text:gsub("[^ ] (.*)", "")..":failed", { default_message = "red<%(1)s:> %(2)s" })
+			local message = messages.load("command", command_name..":failed", { default_message = "red<%(1)s:> %(2)s" })
 			
 			if type(result[2]) ~= "table" then
 				result[2] = { result[2] }
@@ -154,7 +154,7 @@ events.on_text = server.event_handler("text", function(cn, text)
 				:format(unpack(result[3]))
 				:send(cn, true)
 		else
-			local message = messages.load("command", text:gsub("[^ ] (.*)", ""), { default_message = "green<%(1)s:> %(2)s" })
+			local message = messages.load("command", command_name, { default_message = "green<%(1)s:> %(2)s" })
 
 			if type(result[2]) ~= "table" then
 				result[2] = { result[2] }

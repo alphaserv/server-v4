@@ -31,7 +31,11 @@ function reload_server_config()
 	end
 	
 	for name, value in pairs(db_settings) do
-		alpha.settings.get(name):set(value)
+		if alpha.settings.settings[name] then
+			alpha.settings.get(name):set(value)
+		else
+			log_msg(LOG_ERROR, "Found unknown setting %(1)s" % {name})
+		end
 	end
 	
 	--clean up
