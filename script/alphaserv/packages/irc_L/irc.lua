@@ -49,7 +49,7 @@ local table = alpha.settings.new_setting("irc_networks", {
 }, "A hierachy of networks, channels and settings.")
 
 
-server.event_handler("config_loaded", function()
+server.event_handler("pre_started", function()
 	local settings = table:get()
 	
 	local settings_possible = {
@@ -97,7 +97,7 @@ end)
 function send (message)
 	for i, network in pairs(networks) do
 		if network.connected then
-			network:message("#alphaserv", message)
+			network:message("#alphaserv-server", message)
 		end
 	end
 end
