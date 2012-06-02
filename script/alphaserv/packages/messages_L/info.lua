@@ -1,7 +1,9 @@
 
 return {
 	name = "Message system",
-	dependics = {},
+	dependics = {
+		"preferences"
+	},
 	load = {
 		"messages.lua"
 	}

@@ -171,7 +171,10 @@ message_object = class.new(nil, {
 		
 		msg = theme:prefix(self.module_name, self.message_type, self.message_name, is_private, msg)
 
-		msg = string.gsub(msg, "name<[0-9]->(.-)|(.-)|(.-)|", function(cn, seperator, you_text, name_text)
+		msg = string.gsub(msg, "name<([%-0-9]-)> |(.-)|(.-)|", function(cn, you_text, name_text)
+			you_text = you_text or ""
+			name_text = name_text or ""
+			seperator = " "
 			if tonumber(cn) == to and you_replacing:get() then
 				return "name<"..cn..">"..seperator..you_text
 			else
@@ -179,7 +182,7 @@ message_object = class.new(nil, {
 			end
 		end)
 
-		msg = string.gsub(msg, "name<([\-0-9]-)>", function(cn)
+		msg = string.gsub(msg, "name<([%-0-9]-)>", function(cn)
 			cn = tonumber(cn)
 			if cn == to and you_replacing:get() then
 				return "you"
@@ -188,6 +191,17 @@ message_object = class.new(nil, {
 			else
 				return "?unkown?"
 			end
+		end)
+
+		msg = string.gsub(msg, "team<([%-0-9])>", function(cn)
+			if tonumber(cn) == to and you_replacing:get() then
+				return "your team"
+			elseif #server.teams() < 3 then
+				return "the enemy team"
+			else
+				return "team "..server.player_team(tonumber(cn))
+			end
+			
 		end)
 		
 		msg = string.gsub(msg, "red<(.-)>", function (string) return color.red(string) end)
@@ -198,7 +212,7 @@ message_object = class.new(nil, {
 		msg = string.gsub(msg, "green<(.-)>", function (string) return color.green(string) end)
 		msg = string.gsub(msg, "orange<(.-)>", function (string) return color.orange(string) end)
 		msg = string.gsub(msg, "grey<(.-)>", function (string) return color.grey(string) end)
-		
+
 		return self:unescape(msg)
 	end,
 	
@@ -213,7 +227,9 @@ message_object = class.new(nil, {
 		end
 		
 		for _, cn in pairs(to) do
-			server.player_msg(cn, self:color(cn, is_private))
+			if user_from_cn(cn):preference("display::"..self.module_name.."::"..self.message_name) then
+				server.player_msg(cn, self:color(cn, is_private))
+			end
 		end
 		
 		if self.use_irc and irc and irc.send then
@@ -245,13 +261,18 @@ function load(module, name, default)
 			else
 				row = result:fetch()[1]
 			end
-		
+
+			preferences.new("display::"..row.module.."::"..row.name, true)		
 			cache[module.."::"..name] = row
 		elseif backend == "file" then
 			if not f_loaded then
 				if server.file_exists("conf/messages.lua") then
 					server.msg("Loading message ..")
 					cache = dofile("conf/messages.lua")
+					
+					for i, row in pairs(cache) do
+						preferences.new("display::"..row.module.."::"..row.name, true)
+					end
 				end
 				f_loaded = true
 			end
@@ -268,6 +289,8 @@ function load(module, name, default)
 				file:write("return "..alpha.settings.serialize_data(cache, 0))
 	
 				file:close()
+				
+				preferences.new("display::"..module.."::"..name, true)
 			end
 		end
 	end

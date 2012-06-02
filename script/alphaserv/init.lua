@@ -1,6 +1,6 @@
 alpha = {}
 alpha.fn = {} --extern accesable functions
-alpha.spamstartup = true --Default: false
+alpha.spamstartup = false --Default: false
 alpha.init_done = false
 alpha.color = true
 

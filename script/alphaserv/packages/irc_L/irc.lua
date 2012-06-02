@@ -34,16 +34,16 @@ local table = alpha.settings.new_setting("irc_networks", {
 		ip = "irc.gamesurge.net", 
 		port = 6667,
 		channels = {
-			["#alphaserv"] = {
+			["#alphaserv-server"] = {
 				join_msg = "",
 			},
 		},
 		
 		settings = {
 			ignore_non_ops = false,
-			nickname = "testbot",
+			nick = "testbot",
 			username = "alpha-bot",
-			flood_interval = 1000
+			flood_interval = 2000
 		}
 	}
 }, "A hierachy of networks, channels and settings.")
@@ -54,7 +54,7 @@ server.event_handler("pre_started", function()
 	
 	local settings_possible = {
 		ignore_non_ops = true,
-		nickname = true,
+		nick = true,
 		username = true,
 		flood_interval = true		
 	}

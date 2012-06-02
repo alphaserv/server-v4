@@ -125,8 +125,8 @@ end
 events.on_text = server.event_handler("text", function(cn, text)
 	local user = user_from_cn(cn)
 
-	local command_name = text:gsub("^[^ ](.*)", "")
-
+	local command_name = text:split(" ")[1]
+	
 	local result = pack(exec_from_string(user, text))
 
 	if result[1] == -1 then

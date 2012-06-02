@@ -249,6 +249,50 @@ function save()
 			log_msg(LOG_INFO, "user not logged in, skiping")
 		end
 	end --/for i, player in pairs(players) do
+
+	if as_master.client.send_msg then
+		log_msg(LOG_INFO, "saving to external stats database")
+		
+		as_master.client.send_msg({"add_stats", "game", { start_time = start_time, map = server.map, mode = server.gamemode}})
+		if server.get_gamemode_info().teams then
+			for _, name in ipairs(server.teams()) do
+				as_master.client.send_msg({"add_stats", "team", {name = name})
+			end
+		else
+			as_master.client.send_msg({"add_stats", "noteam")
+		end
+		
+		for i, user in pairs(players) do
+			if user.authedwith == "as_ext_auth" and user.ext_key then
+				as_master.client.send_msg({"add_stats", "user", {
+					name = user:get_stat("name"),
+					user_id = user.user_id,
+					key = user.ext_key
+					ip = user:get_stat("ip"),
+					country = user:get_stat("country"),
+					team = user:get_stat("team"),
+					
+					frags = user:get_stat("frags"),
+					deaths = user:get_stat("deaths"),
+					suicicdes = user:get_stat("suicides"),
+					misses = user:get_stat("misses"),
+					shots = user:get_stat("shots"),
+					hits_made = user:get_stat("hits_made"),
+					hits_get = user:get_stat("hits_get"),
+					tk_made = user:get_stat("tk_made"),
+					tk_get = user:get_stat("tk_get"),
+					flags_returned = user:get_stat("flags_returned"),
+					flags_stolen = user:get_stat("flags_stolen"),
+					flags_gone = user:get_stat("flags_gone"),
+					flags_scored = user:get_stat("flags_scored"),
+					total_scored = user:get_stat("total_scored"),
+					win = user:get_stat("win"),
+					rank = user:get_stat("rank")
+				
+				}})
+			end
+		end
+	end
 end
 
 server.event_handler("finishedgame", function()

@@ -1,70 +1,67 @@
 module("flagrun", package.seeall)
 
-local flagC1 = {}
-local timeFlagC1 = {}
-local isValid1 = {}
-local tRun1 = {}
+drops = {}
 
-function isValid1.taking_of_flag(cn)
+server.event_handler("takeflag", function (cn)
+	messages.load("flagrun", "take", {default_type = "info", default_message = "name<%(1)i> |have|has| picked up the flag for team<%(1)i>"})
+		:format(cn)
+		:send()
+	
+	local user = user_from_cn(cn)
+	
+	user.has_flag = true
 
-messages.load("flagrun", "take", {default_type = "info", default_message = "Player %(1)s has picked up the flag for team: %(2)s"}):format (server.player_displayname(cn), server.player_team(cn)):send()
+	if not drops[user:team()] then
+		user.is_flagrun = true
+		user.flagrun_start = server.uptime
+	end
+end)
 
-flagC1.cn = true
-timeFlagC1.cn = server.uptime()
-tRun1['server.player_team(cn)'] = server.uptime()
+server.event_handler("dropflag", function (cn)
+	messages.load("flagrun", "drop", {default_type = "info", default_message = "name<%(1)i> |have|has| lost the flag for team<%(1)i>"})
+		:format(cn)
+		:send()
 
+	local user = user_from_cn(cn)
 
-end
+	drops[user:team()] = true
+	
+	user.is_flagrun = nil
+	user.flagrun_start = nil
+end)
 
-function isValid1.droping_flag(cn)
+server.event_handler("scoreflag", function (cn)
+	local user = user_from_cn(cn)
 
-messages.load("flagrun", "drop", {default_type = "info", default_message = "Player %(1)s has lost the flag for team: %(2)s"})
-:format (server.player_displayname(cn), server.player_team(cn))
-:send ()
+	if not drops[user:team()] then
+		--flagrun
 
-	flagC1.cn = false
-	timeFlagC1.cn = false
+		local time = server.uptime - user.flagrun_start
+		time = time / 1000
+		
+		messages.load("flagrun", "flagrun", {default_type = "info", default_message = "name<%(1)i> |have|has| made a flagrun in %(2)i seconds!"})
+			:format(cn, time)
+			:send()
 
-end
+		user.is_flagrun = nil
+		user.flagrun_start = nil				
+	end
 
-function isValid1.scoring_of_flag(cn)
+	user.has_flag = false
+	drops[user:team()] = nil
+end)
 
-	flagC1.cn = false
-	local i = server.uptime() -timeFlagC1.cn
-	timeFlagC1.cn = false
-	i = (i / 1000)
+server.event_handler("returnflag", function (cn)
+	messages.load("flagrun", "return", {default_type = "info", default_message = "name<%(1)s> |have|has| returned the flag for team<%(1)i>"})
+		:format (cn)
+		:send()
+end)
 
+server.event_handler("resetflag", function ()
 
-messages.load("flagrun", "score", {default_type = "info", default_message = "Player %(1)s has scored for his team: %(2)s in just %(3)i seconds!"})
-:format (server.player_displayname(cn), server.player_team(cn), i)
-:send()
-
-end
-
-function isValid1.returned(cn)
-
-messages.load("flagrun", "return", {default_type = "info", default_message = "Player %(1)s has returned the flag for his team: %(2)s"})
-:format (server.player_displayname(cn), server.player_team(cn))
-:send()
-
-	flagC1.cn = true
-	timeFlagC1.cn = server.uptime()
-
-end
-
-function isValid1.reset_of_flag(cn)
-
-messages.load("flagrun", "reset", {default_type = "info", default_message = "The flag has been reseted!"})
-:send()
-
-	flagC1.cn = true
-	timeFlagC1.cn = server.uptime()	
-
-end
+	messages.load("flagrun", "reset", {default_type = "info", default_message = "The flag has been reset!"})
+		:send()
+end)
 
 
-server.event_handler("takeflag", isValid1.taking_of_flag)
-server.event_handler("dropflag", isValid1.droping_flag)
-server.event_handler("scoreflag", isValid1.scoring_of_flag)
-server.event_handler("returnflag", isValid1.returned)
-server.event_handler("restflag", isValid1.reset_of_flag)
+
