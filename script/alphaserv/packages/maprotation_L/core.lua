@@ -206,34 +206,30 @@ set_backup_intermissionmode("default")
 
 local function on_connect()
 	server.sleep(1000, function()
-		--Check if it's the first player connecting
-		if #alpha.user.users >= 2 then
-			log_msg(LOG_DEBUG, "not first player: "..table_to_string(alpha.user.users))
-			return
-		end
-		log_msg(LOG_DEBUG, "first player")
+		--Check if it's the first player connecting or we are just initing
+		if #server.players() == 1 or #server.players() == 0 then
+			local mode = default_mode:get()
+			local map = default_map:get()
 	
-		local mode = default_mode:get()
-		local map = default_map:get()
+			if not mode and not map then
+				return -- nothing to change
+			end
 	
-		if not mode and not map then
-			return -- nothing to change
-		end
-	
-		mode = mode or server.gamemode
-		map = map or current_map_provider:get_map(mode)
+			mode = mode or server.gamemode
+			map = map or current_map_provider:get_map(mode)
 
-		if mode == "" then
-			mode = "instagib"
-		end
+			if mode == "" then
+				mode = "instagib"
+			end
 
-		if map == "" then
-			map = "reissen"
+			if map == "" then
+				map = "reissen"
+			end
+			log_msg(LOG_INFO, "initial changemap "..tostring(map).." ("..tostring(mode)..")")
+			server.changemap(map, mode)
 		end
-		log_msg(LOG_INFO, "initial changemap "..tostring(map).." ("..tostring(mode)..")")
-		server.changemap(map, mode)
 	end)
 end
 
 server.event_handler("started", on_connect)
-server.event_handler("connect", on_connect)
+server.event_handler("connecting", on_connect)

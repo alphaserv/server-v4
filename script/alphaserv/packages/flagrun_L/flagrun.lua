@@ -45,6 +45,10 @@ server.event_handler("scoreflag", function (cn)
 
 		user.is_flagrun = nil
 		user.flagrun_start = nil				
+	else
+		messages.load("flagrun", "scored", {default_type = "info", default_message = "name<%(1)i> |have|has| scored!"})
+			:format(cn)
+			:send()
 	end
 
 	user.has_flag = false
