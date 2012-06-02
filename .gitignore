@@ -11,5 +11,6 @@
 *.ignore
 /bin/monitor
 /bin/sauer_server
+/bin/utils/keygen
 /lib/*
 *~
