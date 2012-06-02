@@ -184,11 +184,11 @@ setting_obj = class.new(nil, {
 	description = "",
 	
 	--[[!
-		Property: name
+		Property: setting_name
 		The name of the setting
 	]]
 	
-	name = "",
+	setting_name = "",
 	
 	--[[!
 		Function: __init
@@ -204,7 +204,7 @@ setting_obj = class.new(nil, {
 	__init = function(self, value, description, name)
 		self.setting = value
 		self.description = description
-		self.name = name
+		self.setting_name = name
 	end,
 	
 	--[[!
@@ -250,7 +250,7 @@ setting_obj = class.new(nil, {
 		string = string ..
 		"alpha.settings.set (%(1)q, %(2)s)\n\n\n"
 
-		string = string % { tostring(name), serialize_data(self.setting, 0) }
+		string = string % { tostring(name), serialize_data(self:get(), 0) }
 		
 		self.description = nil --we don't need this anymore
 		
@@ -360,7 +360,7 @@ function new_setting(name, value, description, type)
 		type = "default"
 	end
 	
-	settings[name] = types[type](value, description)
+	settings[name] = types[type](value, description, name)
 	
 	return settings[name]
 end
