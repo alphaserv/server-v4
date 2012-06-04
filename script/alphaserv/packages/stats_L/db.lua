@@ -256,10 +256,10 @@ function save()
 		as_master.client.send_msg({"add_stats", "game", { start_time = start_time, map = server.map, mode = server.gamemode}})
 		if server.get_gamemode_info().teams then
 			for _, name in ipairs(server.teams()) do
-				as_master.client.send_msg({"add_stats", "team", {name = name})
+				as_master.client.send_msg({"add_stats", "team", {name = name}})
 			end
 		else
-			as_master.client.send_msg({"add_stats", "noteam")
+			as_master.client.send_msg({"add_stats", "noteam"})
 		end
 		
 		for i, user in pairs(players) do
@@ -267,7 +267,7 @@ function save()
 				as_master.client.send_msg({"add_stats", "user", {
 					name = user:get_stat("name"),
 					user_id = user.user_id,
-					key = user.ext_key
+					key = user.ext_key,
 					ip = user:get_stat("ip"),
 					country = user:get_stat("country"),
 					team = user:get_stat("team"),

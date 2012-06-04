@@ -63,6 +63,10 @@ extern lua::event< boost::tuple<> >                                         even
 extern lua::event< boost::tuple<> >                                         event_interval;
 extern lua::event< boost::tuple<int, int, int, const char *> >              event_cheat;
 
+extern lua::event< boost::tuple<int, int> >              event_edit;
+extern lua::event< boost::tuple<int, int> >              event_sendmap;
+extern lua::event< boost::tuple<int> >              event_getmap;
+
 void register_event_idents(lua::event_environment &);
 
 #endif

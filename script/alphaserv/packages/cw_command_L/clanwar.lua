@@ -1,24 +1,26 @@
 module("clanwar", package.seeall)
 
 command.command_from_table("clanwar", {
-
-list = function(self, player)
-
-	return true, "orange<#clanwar>"
-
-end,
-
-help = function(self, player)
-
-	return true, "red<INFO:> blue< If you want to start a> orange< clanwar > blue<then just type > orange<#clanwar 'map' 'mode'> blue<.>"
-
-end,
-
-execute = function(self, player, map, mode)
-
-server.pausegame(true)
-
-server.msg("\f6CLANWAR\f1 EVENT WILL START IN\f5 20\f1 SECONDS! (\f5" .. mode .. "\f1) ON MAP (\f5" .. map .. "\f1)")
+	usage = "#clanwar [map [mode]]",
+	
+	list = function(self, player)
+		return true, "orange<#clanwar>"
+	end,
+	
+	help = function(self, player)
+		return true, "Command to start clanwars, usage: "..self.usage
+	end,
+	
+	execute = function(self, player, map, mode)
+		map = map or server.map
+		mode = mode or server.gamemode
+		
+		server.pausegame(true)
+		
+		messages.load("clanwar", "announce", {default_type = "info", default_message = "A clanwar event will start in 10 seconds" })
+							:format(map, map2, votes[1], votes[2])
+							:send()
+		server.msg("\f6CLANWAR\f1 EVENT WILL START IN\f5 20\f1 SECONDS! (\f5" .. mode .. "\f1) ON MAP (\f5" .. map .. "\f1)")
 
 server.sleep(20000, function()
 

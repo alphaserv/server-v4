@@ -46,8 +46,6 @@ backend_obj = class.new(preferences.backend_obj, {
 	end,
 	
 	get = function(self, user, preference)
-		server.msg("getting "..preference)
-	
 		if preferences[user.user_id] and type(preferences[user.user_id][preference]) ~= "nil" then
 			return preferences[user.user_id][preference]
 		elseif type(preferences.DEFAULT[preference]) ~= "nil" then
@@ -58,7 +56,6 @@ backend_obj = class.new(preferences.backend_obj, {
 	end,
 	
 	init = function(self, preference, default_value)
-		server.msg("setting "..preference.." "..alpha.settings.serialize_data(value, 0))
 		preferences.DEFAULT[preference] = default_value
 		write()
 	end,

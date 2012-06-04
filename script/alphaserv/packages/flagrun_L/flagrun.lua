@@ -56,12 +56,28 @@ server.event_handler("scoreflag", function (cn)
 end)
 
 server.event_handler("returnflag", function (cn)
+	
+	for team, drop in pairs(drops) do
+		if team ~= server.player_team(cn) then
+			drops[team] = nil
+			break;
+		end
+	end
+
 	messages.load("flagrun", "return", {default_type = "info", default_message = "name<%(1)s> |have|has| returned the flag for team<%(1)i>"})
 		:format (cn)
 		:send()
 end)
 
 server.event_handler("resetflag", function ()
+
+	--[[ TODO
+	for team, drop in pairs(drops) then
+		if team ~= server.player_team(cn) then
+			drops[team] = nil
+			break;
+		end
+	end]]
 
 	messages.load("flagrun", "reset", {default_type = "info", default_message = "The flag has been reset!"})
 		:send()

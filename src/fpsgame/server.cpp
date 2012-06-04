@@ -2423,8 +2423,11 @@ namespace server
         mapdata = opentempfile("mapdata", "w+b");
         if(!mapdata) { sendf(sender, 1, "ris", N_SERVMSG, "failed to open temporary file for map"); return; }
         mapdata->write(data, len);
-        defformatstring(msg)("[%s uploaded map to server, \"/getmap\" to receive it]", colorname(ci));
-        sendservmsg(msg);
+        
+		event_sendmap(event_listeners(), boost::make_tuple(ci->clientnum, len));
+        
+        //defformatstring(msg)("[%s uploaded map to server, \"/getmap\" to receive it]", colorname(ci));
+        //sendservmsg(msg);
     }
 
     void sendclipboard(clientinfo *ci)
@@ -2672,6 +2675,10 @@ namespace server
             case N_EDITMODE:
             {
                 int val = getint(p);
+                
+            	if(event_edit(event_listeners(), boost::make_tuple(ci->clientnum, int(N_EDITMODE))))
+	            	break;
+	            	
                 if(!ci->local && !m_edit) break;
                 if(val ? ci->state.state!=CS_ALIVE && ci->state.state!=CS_DEAD : ci->state.state!=CS_EDITING) break;
                 if(smode)
@@ -3031,6 +3038,10 @@ namespace server
                 loopk(3) getint(p);
                 int type = getint(p);
                 loopk(5) getint(p);
+
+            	if(event_edit(event_listeners(), boost::make_tuple(ci->clientnum, (int)N_EDITENT)))
+            		break; //ignore
+
                 if(!ci || ci->state.state==CS_SPECTATOR) break;
                 QUEUE_MSG;
                 bool canspawn = canspawnitem(type);
@@ -3058,6 +3069,11 @@ namespace server
                     case ID_FVAR: getfloat(p); break;
                     case ID_SVAR: getstring(text, p);
                 }
+
+				//ignore
+               	if(event_edit(event_listeners(), boost::make_tuple(ci->clientnum, (int)N_EDITVAR)))
+               		break;
+               		
                 if(ci && ci->state.state!=CS_SPECTATOR) QUEUE_MSG;
                 break;
             }
@@ -3235,6 +3251,8 @@ namespace server
                 else if(ci->getmap) sendf(sender, 1, "ris", N_SERVMSG, "already sending map");
                 else
                 {
+                	event_getmap(event_listeners(), boost::make_tuple(ci->clientnum));
+
                     sendf(sender, 1, "ris", N_SERVMSG, "server sending map...");
                     if((ci->getmap = sendfile(sender, 2, mapdata, "ri", N_SENDMAP)))
                         ci->getmap->freeCallback = freegetmap;
@@ -3245,6 +3263,10 @@ namespace server
             case N_NEWMAP:
             {
                 int size = getint(p);
+
+            	if(event_edit(event_listeners(), boost::make_tuple(ci->clientnum, (int)N_NEWMAP)))
+            		break; //ignore
+
                 if(!ci->privilege && !ci->local && ci->state.state==CS_SPECTATOR) break;
                 if(ci->check_flooding(ci->sv_newmap_hit, "newmapping")) break;
                 if(size>=0)
@@ -3386,14 +3408,49 @@ namespace server
             default: genericmsg:
             {
                 int size = server::msgsizelookup(type);
+                
                 if(size<=0) {
                     if(anti_cheat_enabled) ci->ac.unknown_packet(type);
                     else disconnect_client(sender, DISC_TAGT);
                     return;
                 }
+                
                 loopi(size-1) getint(p);
-                if(ci && cq && (ci != cq || ci->state.state!=CS_SPECTATOR)) { QUEUE_AI; QUEUE_MSG; }
-                break;
+                                
+            	//alphaserv
+            	switch(type)
+            	{
+            		case N_EDITMODE:
+            		case N_EDITENT:
+            		case N_EDITF:
+            		case N_EDITT:
+            		case N_EDITM:
+            		case N_FLIP:
+            		case N_COPY:
+            		case N_PASTE:
+            		case N_ROTATE:
+            		case N_REPLACE:
+            		case N_DELCUBE:
+            		case N_REMIP:
+            		case N_NEWMAP:
+            		case N_GETMAP:
+            		case N_SENDMAP:
+            		case N_CLIPBOARD:
+            		case N_EDITVAR:
+       	            	if(event_edit(event_listeners(), boost::make_tuple(ci->clientnum, type)))
+		       	            break;
+       	            
+       	            default:
+       	            	if(ci && cq && (ci != cq || ci->state.state!=CS_SPECTATOR))
+       	            	{
+       	            		QUEUE_AI;
+       	            		QUEUE_MSG;
+       	            	}
+       	            	break;
+
+            	}
+            	break;
+
             }
         }
         

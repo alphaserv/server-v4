@@ -9,8 +9,9 @@ auth_obj = class.new(auth.auth_object, {
 	
 	init_clantags = function(self)
 		if self.clantags_loaded == true then return end
-		local res = alpha.db:query("SELECT id, tag FROM clans"):fetch()
+		local res = alpha.db:query("SELECT id, tag, clan_id, status FROM clan_tag WHERE status = 2"):fetch()
 		
+		self.clantags = {}
 		for i, row in pairs(res) do
 			log_msg(LOG_INFO, "Adding tag %(1)s to the clantag list" % { row.tag })
 			self.clantags[row.id] = row.tag
@@ -18,14 +19,18 @@ auth_obj = class.new(auth.auth_object, {
 		
 		res = nil
 		
+		server.sleep(30 * 60000, function()
+			self:init_clantags()
+		end)
+		
 		self.clantags_loaded = true
 	end,
 	
 	
 	_getname = function(self, name)
-		local namerow = alpha.db:query("SELECT id, name, user_id FROM names WHERE name = ?;", name):fetch()
+		local namerow = alpha.db:query("SELECT id, user_id, name, status FROM names WHERE name = ? AND status = 2;", name):fetch()
 		
-		if not namerow or not namerow[1] or not namerow[1]['user_id'] then
+		if not namerow or not namerow[1] or not namerow[1].user_id then
 			return false--no name found in db
 		end
 		
@@ -60,7 +65,7 @@ auth_obj = class.new(auth.auth_object, {
 	_lock = function(self, user, namereserved, clanreserved)
 		reserved_lock = class.new(spectator.lock.lock_obj, {
 			is_locked = function(_, user)
-				local name, row = self:_getname(user:name())
+				local name, row = self:_getname(string.lower(user:name()))
 				
 				if name == true and row.id == user.user_id then
 					return false
@@ -76,7 +81,7 @@ auth_obj = class.new(auth.auth_object, {
 			end,
 	
 			unlock = function(self, player)
-				server.msg(player:name().." authed!")
+
 			end
 		})
 
@@ -90,8 +95,8 @@ auth_obj = class.new(auth.auth_object, {
 	end,
 	
 	reserved_name = function(self, user)
-		local namereserved = self:namereserved(user:name())
-		local clanreserved = self:clanreserved(user:name())
+		local namereserved = self:namereserved(string.lower(user:name()))
+		local clanreserved = self:clanreserved(string.lower(user:name()))
 		if namereserved or clanreserved then
 			self:_lock(user, namereserved, clanreserved)
 			return true, true, {"You are using a reserved name / clantag, please rename or authenticate"}
@@ -110,17 +115,21 @@ auth_obj = class.new(auth.auth_object, {
 	
 		local res = alpha.db:query([[
 			SELECT
-				users.name,
-				users.email,
-				users.pass,
-				users.priv
+				user.id,
+				user.username,
+				user.ingame_password,
+				user.email,
+				user.hashing_method,
+				user.web_password,
+				user.salt,
+				user.status
 			FROM
-				users,
+				user,
 				names
 			WHERE
-				users.id = names.user_id
+				user.id = names.user_id
 			AND
-				names.name = ?;]], user:name())
+				names.name = ?;]], string.lower(user:name()))
 				
 		if res:num_rows() < 1 then
 			return false
@@ -129,7 +138,7 @@ auth_obj = class.new(auth.auth_object, {
 		local row = res:fetch()
 		row = row[1]
 		
-		if user:comparepassword(hash, row.pass) then
+		if user:comparepassword(hash, row.ingame_password) then
 			user.authedwith = "dbauth"
 			user:auth(row.id)
 		
@@ -139,7 +148,14 @@ auth_obj = class.new(auth.auth_object, {
 				user:remove_speclock("protect:name")
 				user:check_locks()
 			end
-			return true, true, {"successfully authed"}
+	
+			server.sleep(1, function()
+				messages.load("dbauth", "success", { default_message = "green<name<%(1)i>> |have|has| authenticated as magenta<%(3)s> (%(2)s)" })
+					:unescaped_format(user.cn, "green<TITLE>", row.username)
+					:send()
+			end)
+	
+			return true, true, {"successfully authed"}, {nomsg = true}
 		else
 			return true, false, {"Password incorrect"}
 		end

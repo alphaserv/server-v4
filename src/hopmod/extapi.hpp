@@ -198,6 +198,12 @@ namespace server
     
     struct clientinfo;
     void try_respawn(clientinfo * ci, clientinfo * cq);
+   	
+   	//alphaserv
+   	void send_map_to(int cn, const char *map);
+   	void send_to(int cn);
+	void save_map(const char *name);
+	void load_map(const char *name);
     
 } //namespace server
 

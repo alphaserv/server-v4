@@ -203,7 +203,10 @@ setmetatable(_G.user_obj, {
 	__newindex = function(table, index, value)
 		user_obj[index] = value
 		user_base_obj[index] = value
-	end
+	end,
+	__index = function(table, key)
+		return user_obj[key] or user_base_obj[index]
+	end,
 })
 
 events = {}

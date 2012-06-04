@@ -1,7 +1,7 @@
 local fields = alpha.settings.new_setting("stats_command_display_fields", { name = "green", username = "green", team = "green", country = "green", frags = "blue", deaths = "orange", suicides = "red", misses = "yellow", shots = "blue", hits_made = "blue", hits_get = "orange", tk_made = "red", tk_get = "red", flags_returned = "green", flags_stolen = "green", flags_gone = "orange", flags_scored = "green", total_scored = "green", damage = "orange", damagewasted = "orange", accuracy = "green", timeplayed = "blue"}, "The fields that the #stats command should use.")
 local chars = alpha.settings.new_setting("stats_command_max_column", 50, "How many columns before starting a new line.")
 
-command_from_table("stats", {
+command.command_from_table("stats", {
 	name = "stats",
 	usage = "usage: #stats, #stats <cn> or #stats <name>",
 	

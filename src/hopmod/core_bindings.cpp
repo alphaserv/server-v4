@@ -161,6 +161,13 @@ void bind_core_functions(lua_State * L, int T)
     bind_function(L, T, "revision", server::revision);
     bind_function(L, T, "version", server::version);
     bind_function(L, T, "filtertext", server::extfiltertext);
+    
+    
+    //alphaserv
+    bind_function(L, T, "send_map_to", server::send_map_to);
+	bind_function(L, T, "send_to", server::send_to);
+    bind_function(L, T, "save_map", server::save_map);
+    bind_function(L, T, "load_map", server::load_map);
 }
 
 template<int Constant>

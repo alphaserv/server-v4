@@ -58,6 +58,14 @@ lua::event< boost::tuple<> >                                         event_sleep
 lua::event< boost::tuple<> >                                         event_interval("interval");
 lua::event< boost::tuple<int, int, int, const char *> >              event_cheat("cheat");
 
+//alphaserv
+//edit cn, package_type
+lua::event< boost::tuple<int, int> >              event_edit("edit");
+lua::event< boost::tuple<int, int> >              event_sendmap("sendmap");
+lua::event< boost::tuple<int> >              event_getmap("getmap");
+
+//TODO: sendmap, getmap, 
+
 void register_event_idents(lua::event_environment & env)
 {
     lua::event_base * events[] = {
@@ -119,6 +127,12 @@ void register_event_idents(lua::event_environment & env)
         & event_sleep,
         & event_interval,
         & event_cheat,
+        
+        //alphaserv
+        & event_edit,
+		& event_sendmap,
+		& event_getmap,        
+        
         NULL
     };
     

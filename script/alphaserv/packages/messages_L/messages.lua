@@ -171,10 +171,10 @@ message_object = class.new(nil, {
 		
 		msg = theme:prefix(self.module_name, self.message_type, self.message_name, is_private, msg)
 
-		msg = string.gsub(msg, "name<([%-0-9]-)> |(.-)|(.-)|", function(cn, you_text, name_text)
+		msg = string.gsub(msg, "name<([%-0-9]-)>([> ]-)|(.-)|(.-)|", function(cn, seperator, you_text, name_text)
 			you_text = you_text or ""
 			name_text = name_text or ""
-			seperator = " "
+			seperator = seperator or " "
 			if tonumber(cn) == to and you_replacing:get() then
 				return "name<"..cn..">"..seperator..you_text
 			else

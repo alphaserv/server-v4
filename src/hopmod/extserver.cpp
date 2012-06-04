@@ -1109,4 +1109,84 @@ const char *extfiltertext(const char *src)
     return dst;
 }
 
+
+//alphaserv
+//send map to
+void send_map_to(int cn, const char *map)
+{
+	clientinfo *ci = get_ci(cn);
+	
+	stream *mapdata = openfile(map, "rb");
+	
+	if(!mapdata)
+	{
+		DELETEP(mapdata);
+		luaL_error(get_lua_state(), "Could not open file.");
+		return;
+	}
+	
+	if((ci->getmap = sendfile(ci->clientnum, 2, mapdata, "ri", N_SENDMAP)))
+    	ci->getmap->freeCallback = freegetmap;
+
+    mapdata->close();    
+    DELETEP(mapdata);
+}
+
+//send sent map to
+void send_to(int cn)
+{
+	clientinfo *ci = get_ci(cn);
+		
+	if((ci->getmap = sendfile(ci->clientnum, 2, mapdata, "ri", N_SENDMAP)))
+    	ci->getmap->freeCallback = freegetmap;
+}
+
+//write sent map down
+void save_map(const char *name)
+{
+    stream *data;
+    
+    if(server::mapdata)
+    {
+        data = openfile(name, "wb");
+        
+        if(!data)
+        {
+        	DELETEP(data);
+            luaL_error(get_lua_state(), "Could not open file to write to.");
+            return;
+		}
+        else
+        {
+            // copy data
+            char *fbuf;
+            long len = server::mapdata->size();
+            fbuf = new char[len];
+
+            server::mapdata->seek(0, SEEK_SET);
+            server::mapdata->read(fbuf, len); // copy file to buffer
+            data->seek(0, SEEK_SET);
+            data->write(fbuf, len); // write buffer to file
+            DELETEA(fbuf);
+
+            // close file
+            data->close();
+            DELETEP(data);
+        }
+	}
+	else
+		luaL_error(get_lua_state(), "No map sent.");
+
+}
+
+//open map
+void load_map(const char *name)
+{
+    if(server::mapdata) DELETEP(server::mapdata);
+    server::mapdata = openfile(name, "rb");
+    
+    if(!server::mapdata)
+    	luaL_error(get_lua_state(), "Could not load map");
+}
+
 #endif
