@@ -19,7 +19,9 @@ command.command_from_table("stats", {
 		end
 		
 		if cn == -1 then
-		
+			for cn, player in pairs(alpha.player.players) do
+				return true, self.send_stats(player, cn)
+			end
 		elseif not server.valid_cn(cn) then
 			cn = server.name_to_cn(cn)
 			
@@ -28,11 +30,11 @@ command.command_from_table("stats", {
 			end
 		end
 		
-		send.stats(player, cn)
+		return true, self.send_stats(player, cn)
 	end,
 	
 	send_stats = function(player, cn)
-		local ret = {}
+		local ret = {"Stats for name<%(1)i>" % {cn}}
 		local user = user_from_cn(cn)
 		local count = chars:get()
 		
@@ -43,9 +45,68 @@ command.command_from_table("stats", {
 				ret[#ret] = ret[#ret] .. ", "
 			end
 			
-			ret[#ret] = ret[#ret] .. color .. "<" .. user:get_stat(row) .. ">"
+			ret[#ret] = ret[#ret] .. color .. "<" .. row ..": ".. user:get_stat(row) .. ">"
 		end
 		
 		return ret
+	end,
+})
+
+command.command_from_table("names", {
+	name = "names",
+	usage = "usage: #names <cn> or #names <ip> or #names <name>",
+	
+	list = function(self, player)
+		return true, "blue<names>"
+	end,
+	
+	help = function(self, player)
+		return true, "This command displays all names of an user. Usage: "..self.usage
+	end,
+	
+	execute = function(self, player, cn)
+		if not cn then
+			return false, self.usage
+		end
+		
+		local res
+		if server.valid_cn(cn) then
+			res = alpha.db:query([[
+				SELECT
+					stats_users.name
+				FROM
+					stats_users
+				WHERE
+					stats_users.ip = ?]], server.player_ip(cn)):fetch()
+
+		elseif string.match(cn, "^[0-9]{1,3}%.[0-9]{1,3}%.[0-9]{1,3}%.[0-9]{1,3}$") then
+			res = alpha.db:query([[
+				SELECT
+					stats_users.name
+				FROM
+					stats_users
+				WHERE
+					stats_users.ip = ?]], cn):fetch()
+
+		else
+			res = alpha.db:query([[
+				SELECT
+					stats_users.name
+				FROM
+					stats_users,
+					stats_users AS now
+				WHERE
+					now.ip = stats_users.ip
+				AND
+					now.name = ?]], cn)
+		end
+		
+		local msg = {"Found names:"}
+		
+		for i, row in pairs(res) do
+			table.insert(msg, row.name)
+		end
+		
+		return true, msg
 	end,
 })

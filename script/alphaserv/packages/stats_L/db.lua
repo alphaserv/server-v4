@@ -7,7 +7,7 @@ local save_stats = alpha.settings.new_setting("save_stats", true, "save stats da
 local server_id = alpha.settings.new_setting("stats_server_id", 0, "id of the server in the database.")
 local min_time_played = alpha.settings.new_setting("stats_min_time_played", -1, "minimum time played before saving player in the stats.")
 local only_logged_in = alpha.settings.new_setting("stats_ony_logged_in", false, "only save stats for players wich are logged in.")
-local min_players = alpha.settings.new_setting("stats_min_players", -1, "minimum playercount to save stats.")
+local min_players = alpha.settings.new_setting("stats_min_players", 2, "minimum playercount to save stats.")
 
 --the time when the game started
 local start_time = os.time()
@@ -53,21 +53,51 @@ function save()
 	log_msg(LOG_INFO, "saving stats")
 	
 	local game_id = -1
+	
+	local map = alpha.db:query([[
+		SELECT
+			id
+		FROM
+			map
+		WHERE
+			name = ?]], server.map)
+	
+	if not map or map:num_rows() < 1 then
+		alpha.db:query(
+			[[
+				INSERT INTO
+					map
+					(
+						name
+					)
+				VALUES
+					(
+						?
+					)
+			]], server.map
+			
+		)
+		
+		map = alpha.db:query("SELECT last_insert_id() AS id")
+	end
+	
 
 	if not alpha.db:query([[
 		INSERT INTO
 			stats_games
 			(
-				map,
+				map_id,
 				mode,
-				datetime
+				start_time,
+				end_time
 			)
 		VALUES
 			(
 				?,
 				?,
-				from_unixtime(%(1)i)
-			)]] % {	start_time }, server.map, server.gamemode) then--TODO: map_id
+				from_unixtime(%(1)i),
+				from_unixtime(%(2)i)
+			)]] % {	start_time, os.time() }, map:fetch()[1].id, server.gamemode) then--TODO: map_id
 		error("Error while saving stats: could not insert game")
 	end
 
@@ -129,7 +159,6 @@ function save()
 					game_id,
 					ip,
 					country,
-					team,
 					team_id,
 					playing,
 					frags,
@@ -152,11 +181,10 @@ function save()
 			VALUES
 				(
 					?,
+					%(1)s,
 					?,
 					?,
-					?,
-					?,
-					?,
+					%(1)s,
 					?,
 					?,
 					?,
@@ -176,14 +204,14 @@ function save()
 					?,
 					?
 				)
-			]], 
+			]] % {
+				user.user_id == -1 and "NULL" or tonumber(user.user_id),
+				user:get_stat("team_id") == -1 and "NULL" or tonumber(user:get_stat("team_id"))
+			}, 
 				user:get_stat("name"),
-				tonumber(user.user_id or -1),
 				tonumber(game_id or -1),
 				user:get_stat("ip"),
 				user:get_stat("country"),
-				user:get_stat("team"),
-				user:get_stat("team_id") or -1,
 				1, --playing
 				user:get_stat("frags"),
 				user:get_stat("deaths"),

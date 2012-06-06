@@ -241,7 +241,7 @@ end
 ]]
 
 function _G.user_from_cn(cn)
-	return users[cn] or error("cannot fin player from cn "..cn.." table: "..table_to_string(users))
+	return users[cn] or error("cannot fin player from cn "..cn)
 end
 
 --[[
