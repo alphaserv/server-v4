@@ -19,7 +19,6 @@ end
 
 init_preferences = {}
 function new(name, value)
-	server.msg("new: "..name.." = ".. tostring(value))
 	if init_preferences then
 		init_preferences[name] = value
 	else

@@ -38,3 +38,5 @@ alpha.settings.new_setting("server_password", "", "A pass that is required to co
 alpha.settings.new_setting("allow_mastermode_veto", 1, "Permit master players to switch to veto mode.", "server_var")
 alpha.settings.new_setting("allow_mastermode_locked", 1, "Permit master players to switch to locked mode.", "server_var")
 alpha.settings.new_setting("allow_mastermode_private", 0, "Permit master players to switch to private mode.", "server_var")
+
+_G.setting_send_log = alpha.settings.new_setting("send_log", false, "send log messages to clients.")
