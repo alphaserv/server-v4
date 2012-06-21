@@ -267,7 +267,6 @@ function load(module, name, default)
 		elseif backend == "file" then
 			if not f_loaded then
 				if server.file_exists("conf/messages.lua") then
-					server.msg("Loading message ..")
 					cache = dofile("conf/messages.lua")
 					
 					for i, row in pairs(cache) do
