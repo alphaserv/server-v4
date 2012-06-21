@@ -1127,9 +1127,13 @@ void send_map_to(int cn, const char *map)
 	
 	if((ci->getmap = sendfile(ci->clientnum, 2, mapdata, "ri", N_SENDMAP)))
     	ci->getmap->freeCallback = freegetmap;
+	
+	ci->needclipboard = totalmillis;
 
     mapdata->close();    
     DELETEP(mapdata);
+    
+    event_sendmap(event_listeners(), boost::make_tuple(cn, -1));
 }
 
 //send sent map to
@@ -1139,6 +1143,10 @@ void send_to(int cn)
 		
 	if((ci->getmap = sendfile(ci->clientnum, 2, mapdata, "ri", N_SENDMAP)))
     	ci->getmap->freeCallback = freegetmap;
+    
+    ci->needclipboard = totalmillis;
+    
+    event_sendmap(event_listeners(), boost::make_tuple(cn, -1));
 }
 
 //write sent map down
@@ -1148,7 +1156,7 @@ void save_map(const char *name)
     
     if(server::mapdata)
     {
-        data = openfile(name, "wb");
+        data = openfile(name, "w+b");
         
         if(!data)
         {
@@ -1182,11 +1190,38 @@ void save_map(const char *name)
 //open map
 void load_map(const char *name)
 {
-    if(server::mapdata) DELETEP(server::mapdata);
-    server::mapdata = openfile(name, "rb");
+    stream *data;
     
-    if(!server::mapdata)
-    	luaL_error(get_lua_state(), "Could not load map");
+    data = openfile(name, "rb");
+    
+    if(!data)
+    {
+    	DELETEP(data);
+    	luaL_error(get_lua_state(), "Could not open map file.");
+    	return;
+    }
+    
+    if(mapdata) DELETEP(mapdata);
+    mapdata = opentempfile("mapdata", "w+b");
+    if(!mapdata)
+    {
+    	DELETEP(mapdata);
+    	luaL_error(get_lua_state(), "Could not open sendmap tempfile.");
+    	return;
+    }
+    
+    char *buf;
+    long len = data->size();
+    buf = new char[len];
+    data->seek(0, SEEK_SET);
+    data->read(buf, len);
+
+	mapdata->seek(0, SEEK_SET);
+	mapdata->write(buf, len);
+	DELETEA(buf);
+	
+	data->close();
+	DELETEP(data);
 }
 
 #endif

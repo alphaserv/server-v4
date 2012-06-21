@@ -140,11 +140,11 @@ alpha.db = {
 			return string.format("%q", replacements[i])
 		end)
 		
-		local result = assert (obj.connection:execute(sql))
+		local result, error_ = obj.connection:execute(sql)
 
 		if not result then
 			server.sleep(1, function() obj:disconnect(true) end)
-			error('sql generated an error:  "'..sql..'", returned: "'..tostring(result)..'", reconnecting')
+			error('sql generated an error:  "'..sql..'", returned: "'..tostring(error_)..'", reconnecting')
 		end
 		
 		--insert or delete query
