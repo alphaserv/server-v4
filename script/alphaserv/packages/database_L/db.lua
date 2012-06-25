@@ -1,9 +1,9 @@
+require "luasql_mysql"
+
 if not alpha then error("trying to load 'db.lua' before alpha init."); return end
 
 local db_load
-if not alpha.standalone then
-	db_load = server.create_event_signal("db_loaded")
-end
+db_load = server.create_event_signal("db_loaded")
 
 local RECONNECT = 3000
 local connected = false
@@ -82,13 +82,11 @@ local resultobject = {
 }
 
 alpha.db = {
-	env = nil,
 	connection = nil,
 	connected = false,
 	connect = function (obj)
-		if not obj.env then error('Please open an enviroment first') end
 		obj.connection = assert(
-			obj.env:connect(
+			luasql.mysql():connect(
 				db_name:get(),
 				db_username:get(),
 				db_password:get(),
@@ -96,25 +94,17 @@ alpha.db = {
 				db_port:get()
 			)
 		)
+		
 		obj.connected = true
 	end,
-	open = function (obj, type_, ...)
-		if not type_ then type_ = 'mysql' end
-		if type_ == 'mysql' then
-			require "luasql_mysql"
-		else
-			require ("luasql."..type_)
-		end			
-		obj.env = assert(luasql[type_](unpack(arg or {})))
-	end,
+
 	disconnect = function (obj, reconnect)
 		obj.connection:close()
-		obj.env:close()
 		connected = false
 				
 		if reconnect == true then
 			server.sleep(RECONNECT, function()
-				obj.connect()
+				obj:connect()
 			end)
 		end
 	end,
@@ -156,7 +146,6 @@ alpha.db = {
 
 if not alpha.standalone then
 	server.event_handler("config_loading", function()
-		alpha.db:open("mysql")
 		alpha.db:connect()
 		db_load()
 		server.cancel_event_signal("db_loaded")
