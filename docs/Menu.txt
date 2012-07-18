@@ -46,34 +46,48 @@ Format: 1.51
 # --------------------------------------------------------------------------
 
 
-Group: Script  {
+Group: As  {
 
-   Group: Language  {
+   File: component.lua  (no auto-title, as/component.lua)
+   File: table.lua  (no auto-title, as/table.lua)
+   File: core.lua  (no auto-title, as/core.lua)
+   }  # Group: As
 
-      File: mod_class.lua  (language/mod_class.lua)
-      File: mod_conv.lua  (language/mod_conv.lua)
-      File: mod_math.lua  (language/mod_math.lua)
-      File: mod_string.lua  (language/mod_string.lua)
-      File: mod_table.lua  (language/mod_table.lua)
-      }  # Group: Language
+Group: Components  {
 
-   Group: Alphaserv  {
+   Group: db  {
 
-      Group: Core  {
+      File: init.lua  (no auto-title, components/db/init.lua)
+      File: connection.lua  (no auto-title, components/db/connection.lua)
+      }  # Group: db
 
-         File: general.lua  (no auto-title, alphaserv/core/general.lua)
-         File: logging.lua  (no auto-title, alphaserv/core/logging.lua)
-         File: package.lua  (no auto-title, alphaserv/core/package.lua)
-         File: settings.lua  (alphaserv/core/settings.lua)
-         File: user.lua  (alphaserv/core/user.lua)
-         }  # Group: Core
+   }  # Group: Components
 
-      }  # Group: Alphaserv
+Group: Package  {
 
-   }  # Group: Script
+   File: mod_class.lua  (package/language/mod_class.lua)
+   File: mod_conv.lua  (package/language/mod_conv.lua)
+   File: mod_math.lua  (package/language/mod_math.lua)
+   File: mod_string.lua  (package/language/mod_string.lua)
+   File: mod_table.lua  (package/language/mod_table.lua)
+   }  # Group: Package
 
-File: chan_obj.lua  (alphaserv/packages/irc_L/chan_obj.lua)
-File: network_obj.lua  (alphaserv/packages/irc_L/network_obj.lua)
+Group: Alphaserv  {
+
+   File: chan_obj.lua  (alphaserv/packages/irc_L/chan_obj.lua)
+
+   Group: Core  {
+
+      File: general.lua  (alphaserv/core/general.lua)
+      File: logging.lua  (alphaserv/core/logging.lua)
+      File: package.lua  (alphaserv/core/package.lua)
+      File: settings.lua  (alphaserv/core/settings.lua)
+      File: user.lua  (alphaserv/core/user.lua)
+      File: user_base.lua  (alphaserv/core/user_base.lua)
+      }  # Group: Core
+
+   File: network_obj.lua  (alphaserv/packages/irc_L/network_obj.lua)
+   }  # Group: Alphaserv
 
 Group: Index  {
 
@@ -81,7 +95,7 @@ Group: Index  {
    Class Index: Classes
    File Index: Files
    Function Index: Functions
-   Variable Index: Variables
    Property Index: Properties
+   Variable Index: Variables
    }  # Group: Index
 

@@ -1,5 +1,5 @@
 --[[!
-    File: script/as/core.lua
+    File: script/as/table.lua
 
     About: Author
         Killme
