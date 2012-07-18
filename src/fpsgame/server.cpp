@@ -642,7 +642,10 @@ namespace server
                 sendf(-1, 1, "ri2", N_CDIS, cn);
                 ci->sendprivtext(RED "You've entered the spy-mode.");
             }
+            
+            //TODO: use events for messages
             defformatstring(admin_info)(RED "ADMIN-INFO: %s joined the spy-mode.", ci->name);
+            
             loopv(clients) if(clients[i] != ci && clients[i]->privilege >= PRIV_ADMIN) clients[i]->sendprivtext(admin_info);
             ci->spy = true;
             ci->clientnum = spycn + spies.length();
@@ -2542,7 +2545,8 @@ namespace server
 
                 if(m_demo) setupdemoplayback();
                 
-                event_connect(event_listeners(), boost::make_tuple(ci->clientnum, ci->spy));
+                if(!ci->spy)
+                	event_connect(event_listeners(), boost::make_tuple(ci->clientnum, ci->spy));
                 
             }
         }

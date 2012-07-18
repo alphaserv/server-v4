@@ -33,7 +33,7 @@ function register_server(hostname, port)
             client:async_read_until("\n", function(line, error_message)
                 
                 if not line then
-					error("could not register server, "..error_message or "unable to read reply")
+					error("could not register server ("..server.serverport.."=>"..hostname..":"..port.."), "..error_message or "unable to read reply")
                     return
                 end
                 
@@ -44,7 +44,7 @@ function register_server(hostname, port)
 					client:close()
                 elseif command == "failreg" then
                 	client:close()
-	                error("could not register server, ".. reason or "master rejected registration")
+	                error("could not register server ("..server.serverport.."=>"..hostname..":"..port.."), ".. reason or "master rejected registration")
                 else
                 	client:close()
 					error("could not register server, master sent unkown reply: "..line)
@@ -60,7 +60,7 @@ function init()
 	
 	local function loop()
 		
-		for i, address in pairs(servers:get()) do
+		for i, adress in pairs(servers:get()) do
 			local ip, port = unpack(adress:split(":"))
 			
 			register_server(tostring(ip), tonumber(port))

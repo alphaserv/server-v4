@@ -204,7 +204,23 @@ namespace server
    	void send_to(int cn);
 	void save_map(const char *name);
 	void load_map(const char *name);
-    
+	
+	void editvar(int cn, const char *var, int value);
+	
+	void fake_msg(int cn_from, int cn_to, const char * text);
+	void fake_text(int cn_from, int cn_to, const char * text);
+	
+	void fake_disconnect(int cn_to, int cn);
+	void fake_connect(int cn, int ocn, const char * name, const char * team);
+	void no_spawn(int cn, int canspawn);
+	void do_spawn_player(int cn);
+	
+	void send_sound(int cn, int num);
+	int damage_player (int cn, int damage);
+	void send_gamestate(int cn);
+	void set_gamestate(int cn, int health, int maxhealth, int amour, int amourtype, int gunselect);
+	void set_ammo(int cn, int gun_id, int ammo);
+	
 } //namespace server
 
 #endif

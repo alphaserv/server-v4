@@ -28,19 +28,9 @@ fi
 
 cd $d_main
 
-if [ ! -d log ]
+if [ ! -d bin ] || [ ! -d data ] || [ ! -d script ]
 then
-	mkdir log
-fi
-
-if [ ! -d conf ]
-then
-	mkdir conf
-fi
-
-if [ ! -d bin ] || [ ! -d log ] || [ ! -d conf ] || [ ! -d script ]
-then
-    echo "Incomplete Installation! bin/, log/, conf/ or script/ are missing."
+    echo "Incomplete Instance! bin/, data/ or script/ are missing."
     exit 1
 fi
 

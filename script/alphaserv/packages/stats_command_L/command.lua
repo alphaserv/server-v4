@@ -98,7 +98,7 @@ command.command_from_table("names", {
 				WHERE
 					now.ip = stats_users.ip
 				AND
-					now.name = ?]], cn)
+					now.name = ?]], cn):fetch()
 		end
 		
 		local msg = {"Found names:"}

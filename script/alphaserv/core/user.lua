@@ -241,6 +241,10 @@ end
 ]]
 
 function _G.user_from_cn(cn)
+	if not users[cn] and server.valid_cn(cn) then --prob reloaded
+		OnConnect(cn)
+	end
+	
 	return users[cn] or error("cannot fin player from cn "..cn)
 end
 

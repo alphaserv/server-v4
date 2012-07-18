@@ -1,51 +1,89 @@
 
 module("bans", package.seeall)
 
-function is_ip_banned(ip)
+function is_banned(cn)
+	server.msg("checking bans ... ("..os.time()..")")
+	local result = alpha.db:query([[
+		SELECT
+			id,
+			expire_time,
+			name,
+			ip,
+			reason
+		FROM
+			bans
+		WHERE
+		(
+				ip
+			OR
+				name = ?
+		)
+		AND
+		(
+				expire_time > ?
+			OR
+				expire_time = -1
+		)
+		]], server.player_name(cn), os.time())
+	
+	result = result:fetch()
 
-	result = alpha.db:query("SELECT id, reason, expire, ip, by_ip, by_name FROM	bans WHERE ip = ?;", ip)
-	
-	if not result then
-		error("could not check bans! for ip: %(1)s, query returned false" % {ip })
-	end
-	
-	if result:num_rows() > 0 then
-		local res_row
-		for i, row in ipairs(result:fetch()) do
-			if row.expire ~= -1 and tonumber(row.expire) < os.time() then
-				clean_ban(row.id)
-			else
-				res_row = row
+	server.msg(#result)
+	for j, row in pairs(result) do
+		if row.ip then
+			local ip = string.split(row.ip, '.')
+			local check_ip = string.split(server.player_ip(cn), '.')
+			server.msg(row.ip .. "vs" .. server.player_ip(cn))
+			for i, part in ipairs(ip) do
+				if part ~= "*" then --allow wildchars
+					if check_ip[i] ~= part then
+						result[j] = nil
+					end
+				end
 			end
 		end
-		
-		if res_row then
-			return true, res_row
-		end
+	end
+	server.msg(#result)
+	if #result > 0 then
+		return true, result[1]
+	else
+		return false
+	end
+end
+
+function block_user(cn, reason)
+	
+	--Fake disconnect all other players
+	for i, cn_ in pairs(server.players()) do
+		server.fake_disconnect(cn, cn_)
 	end
 	
-	return false
+	server.disconnect(cn, server.DISC_IPBAN, "")
+
+	server.setspy(cn, true)	
+	--mute and mute.mute({cn = cn}, -1)
 end
 
-function block_user(cn)
-	server.setspy(cn)
-	server.force_spec(cn)
-end
+function server.kick(cn, bantime, admin, reason)
 
-function clear_ban(id)
-	log_msg(LOG_INFO, "Clearing ban %(1)i" % {id})
-end
-
-local connect_event = server.event_handler("connecting", function(cn)
-
+	local real_admin
 	
+	if admin and server.valid_cn(admin) and user_from_cn(admin).user_id ~= -1 then
+		real_admin = user_from_cn(admin).user_id
+	end
+end
+server.permban(ip)	 nil	 Set IP address range as permanently banned from the server.
+server.unsetban(ip)
 
-	local is_banned, row = is_ip_banned(cn)
+
+server.event_handler("connecting", function(cn)
+
+	local is_banned, row = is_banned(cn)
 	
 	if is_banned then
-		messages.load("ban", "banned", {default_type = "warning", default_message = "orange<YOU> red<are currently> orange<BANNED>"})
-				--:format()
-				:send(cn, true)
+		messages.load("ban", "banned", {default_type = "warning", default_message = "orange<YOU> red<are currently> orange<BANNED>, red<reason:> orange<%(1)s>"})
+			:format(row.reason)
+			:send(cn, true)
 		
 		block_user(cn)
 	end

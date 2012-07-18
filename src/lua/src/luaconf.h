@@ -202,7 +202,7 @@
 @@ LUA_BITWISE_OPERATORS enable logical operators | & ^| >> << ~ on lua_Number
 @* but also arithmetic operator \ (integer division) and != as an alernative to ~=
 */
-#define LUA_BITWISE_OPERATORS
+//#define LUA_BITWISE_OPERATORS
 
 
 /*

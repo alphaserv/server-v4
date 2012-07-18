@@ -1,6 +1,8 @@
-package.path = package.path .. ";script/package/?.lua;"
-package.path = package.path .. ";script/?.lua;"
-package.cpath = package.cpath .. ";lib/lib?.so"
+print "???"
+os.exit()
+package.path = "script/package/?.lua;" .. package.path
+package.path = "script/?.lua;" .. package.path
+package.cpath = "lib/lib?.so;" .. package.cpath
 
 dofile("script/hopmod_base/pcall.lua")
 dofile("script/hopmod_base/core_function_overloads.lua")

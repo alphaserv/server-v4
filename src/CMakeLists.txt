@@ -1,6 +1,11 @@
 add_subdirectory(geoip)
 add_subdirectory(enet)
+
+# do not uncomment this line unless you feel like rewriting lpeg, re and orbit. ty
+#add_definitions(-D LUA_BITWISE_OPERATORS)
+
 add_subdirectory(lua)
+
 if(NOT IS_DIRECTORY /usr/include/boost)
     add_subdirectory(boost)
     set(BOOST_LIBS ${BOOST_SIGNALS_LIBRARY} ${BOOST_THREAD_LIBRARY})
@@ -15,6 +20,7 @@ add_subdirectory(fungu)
 add_subdirectory(lsqlite3-7)
 add_subdirectory(luasql)
 add_subdirectory(socket)
+add_subdirectory(lpeg)
 
 include(CheckLibraryExists)
 
@@ -109,7 +115,8 @@ target_link_libraries(${LUA_MODULE_LIB}
     ${FUNGU_HTTP_LIBRARY}
     ${LSQLITE3_LIBRARY}
     ${OPENSSL_LIBRARIES}
-    ${LUA_SOCKET_LIBRARY})
+    ${LUA_SOCKET_LIBRARY}
+    ${LUA_LPEG_LIBRARY})
 
 SET(GAME_SERVER_SOURCES
     engine/server.cpp

@@ -8,15 +8,23 @@ storage_obj = class.new(nil, {
 	table = {},
 	
 	set = function(self, ip, value)
+		server.msg("setting ..")
 		self.table[ip] = value
 	end,
 	
 	get = function(self, ip)
-		return self.table[ip] or {}
+		server.msg(table_to_string(self.table[ip]))
+		return self.table[ip]
 	end,
 	
 	add = function(self, ip, end_time, name)
-		self.table[ip] = {name = name, time = end_time }
+		server.msg("adding")
+		
+		if not self.table[ip] then
+			self.table[ip] = {}
+		end
+		
+		table.insert(self.table[ip], {name = name, time = end_time })
 	end,
 })
 
@@ -32,6 +40,8 @@ punishment_obj = class.new(nil, {
 	do_punish = function(self, player, time, reason)
 		self:punish(player)
 		
+		server.msg("punish "..time.." "..reason)
+		
 		return self
 	end,
 	
@@ -45,7 +55,7 @@ punishment_obj = class.new(nil, {
 local storage = storage_obj()
 punishments = {}
 
-function punish(player, reason)
+function punish(player, reason, override_punishment, override_time)
 	--fetch the punishments
 	local punishments_reasons = punishments_setting:get()
 	
@@ -66,14 +76,18 @@ function punish(player, reason)
 	end
 	
 	punishment = punishments[name]:do_punish(player, time, reason)
-		
-	storage:add(player:ip(), os.time() + time, name)
+	
+	server.msg(server.enet_time_get())
+	server.msg(server.enet_time_get() + time)
+	storage:add(player:ip(), server.enet_time_get() + time, name)
 	
 	server.sleep(time, check_punishments)
 end
 
 function check_punishments()
+	server.msg("checking punishments")
 	for cn, user in pairs(alpha.user.users) do
+		server.msg("checking punishment")
 		user:check_punishments()
 	end
 end
@@ -82,7 +96,8 @@ user_obj.check_punishments = function(self)
 	local user_punishments = storage:get(self:ip())
 	
 	for i, punishment in pairs(user_punishments) do
-		if punishment.time < os.time() then
+		server.msg(punishment.time.. " <= "..server.enet_time_get())
+		if punishment.time <= server.enet_time_get() then
 			punishments[punishment.name]:undo_punish(self)
 			user_punishments[i] = nil
 		end
@@ -97,13 +112,15 @@ spectate = class.new(punishment_obj, {
 	punish = function(self, player)
 		local lock = class.new(spectator.lock.lock_obj, {
 			is_locked = function(self, player) return true end,
+			unlock = function(self, player) player:msg("Your speclock is over") end,
 		})
 		
 		player:add_speclock("punish", lock())
 	end,
 	
 	unpunish = function(self, player)
-		user:remove_speclock("punish")
+		server.msg("unspecing")
+		player:remove_speclock("punish")
 	end,
 })
 

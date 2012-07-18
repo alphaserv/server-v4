@@ -1,5 +1,5 @@
 #!/bin/sh
-export REVISION=`svn info | grep 'Revision: ' | awk '{print $2}'`
+export REVISION="alpha 0.0.0"
 THREADS=1
 if [ `uname -s` = "Linux" -a -d "/proc" ]; then
     THREADS=`cat /proc/cpuinfo | grep processor | wc -l`
@@ -25,10 +25,14 @@ STRTHREADS="threads"
 if [ $THREADS = 1 ]; then
   STRTHREADS="thread"
 fi
-echo "$STRCOMPILE Hopmod r$REVISION using $THREADS $STRTHREADS ($BUILDTYPE build)\n"
+echo "$STRCOMPILE Alphaserv $REVISION using $THREADS $STRTHREADS ($BUILDTYPE build)\n"
 TS_START=`date +%s`
 make -j$THREADS 
 make install >> /dev/null
 TS_END=`date +%s`
 TS_DIFF=`echo $TS_END $TS_START | awk '{print $1 - $2}'`
 echo "\nTook $TS_DIFF Seconds"
+cd ..
+
+export _AS_BASEPATH=${PWD}
+sh "${_AS_BASEPATH}/bin/server" "luapp" "${PWD}/script/install.lua"

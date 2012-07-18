@@ -15,3 +15,7 @@
 /lib/*
 *~
 /content/*
+/instances/?/
+/instances/??/
+/instances/???/
+/base_config.lua
