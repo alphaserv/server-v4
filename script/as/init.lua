@@ -1,3 +1,4 @@
-require "language"
+require "std"
+require "utils"
 require "as.component"
-require "as.table"
+

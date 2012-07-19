@@ -236,7 +236,7 @@ as = {
 		local settings = {}
 		
 		for i, file in pairs(config) do
-			settings = static "as.table".mergeArray(settings, file)
+			settings = table.merge(settings, file)
 		end
 		
 		if self.debugConfig then
