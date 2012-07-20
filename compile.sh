@@ -1,5 +1,5 @@
 #!/bin/sh
-export REVISION="alpha 0.0.0"
+export REVISION=0 #"alpha 0.0.0"
 THREADS=1
 if [ `uname -s` = "Linux" -a -d "/proc" ]; then
     THREADS=`cat /proc/cpuinfo | grep processor | wc -l`
