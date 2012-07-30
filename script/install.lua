@@ -1,10 +1,4 @@
-
-require "script.env"
-
---when basepath is not set yet
-if BASEPATH:match("%{.*%}") then
-	BASEPATH = os.getenv("_AS_BASEPATH")
-end
+BASEPATH = os.getenv("_AS_BASEPATH")
 
 require "hopmod_base.pcall"
 
