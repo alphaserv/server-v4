@@ -879,6 +879,7 @@ vector<const char *> gameargs;
 
 bool restart_program;
 
+
 int main(int argc, char* argv[])
 {
     restart_program = false;
@@ -890,9 +891,10 @@ int main(int argc, char* argv[])
     for(int i = 1; i<argc; i++) if(argv[i][0]!='-' || !serveroption(argv[i])) gameargs.add(argv[i]);
     game::parseoptions(gameargs);
     
+	
     initserver(true, true);
     
-    if(restart_program)
+	if(restart_program)
     {
         execv(argv[0], argv);   
     }

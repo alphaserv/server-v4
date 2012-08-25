@@ -1,6 +1,6 @@
 package.path = package.path .. ";script/package/?.lua;"
 package.cpath = package.cpath .. ";lib/lib?.so"
-
+--[[
 dofile("script/base/pcall.lua")
 dofile("script/base/core_function_overloads.lua")
 dofile("script/base/event.lua")
@@ -58,4 +58,7 @@ end)
 
 exec_if_found("conf/server.conf")
 exec("base/saveconf.lua")
+]]
 
+require "plugin"
+Plugin:loadDir()

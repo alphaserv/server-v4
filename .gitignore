@@ -1,0 +1,14 @@
+/release_build/
+/1
+/0
+/core
+/log/status.log
+/log/error.log
+/log/sauer_server.pid
+/bin/monitor
+/bin/sauer_server
+/bin/utils/keygen
+/bin/utils/luapp
+/lib
+/nbproject/private
+

@@ -22,9 +22,9 @@ void init_hopmod()
     
     info_file("log/sauer_server.pid", "%i\n", getpid());
     
-    init_lua();
+	init_lua();
     
-    static const char * INIT_SCRIPT = "script/base/init.lua";
+    static const char * INIT_SCRIPT = "script/init.lua";
     
     lua_State * L = get_lua_state();
     if(luaL_loadfile(L, INIT_SCRIPT) == 0)
@@ -37,6 +37,10 @@ void init_hopmod()
         std::cerr<<"error during initialization: "<<lua_tostring(L, -1)<<std::endl;
         lua_pop(L, 1);
     }
+    
+	#ifdef LUAJIT
+		luaJIT_setmode(L, 0, LUAJIT_MODE_ENGINE|LUAJIT_MODE_OFF);
+	#endif
     
     event_init(event_listeners(), boost::make_tuple());
 }

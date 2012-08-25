@@ -1,6 +1,14 @@
 add_subdirectory(geoip)
 add_subdirectory(enet)
-add_subdirectory(lua)
+
+set(USE_LUAJIT false)
+
+if(${USE_LUAJIT})
+	add_subdirectory(luajit)
+	add_definitions(-DLUAJIT)
+else(${USE_LUAJIT})
+	add_subdirectory(lua)
+endif(${USE_LUAJIT})
 if(NOT IS_DIRECTORY /usr/include/boost)
     add_subdirectory(boost)
     set(BOOST_LIBS ${BOOST_SIGNALS_LIBRARY} ${BOOST_THREAD_LIBRARY})

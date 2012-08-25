@@ -27,7 +27,9 @@ if [ $THREADS = 1 ]; then
 fi
 echo "$STRCOMPILE Hopmod r$REVISION using $THREADS $STRTHREADS ($BUILDTYPE build)\n"
 TS_START=`date +%s`
-make -j$THREADS 
+
+set -e
+make -j$THREADS
 make install >> /dev/null
 TS_END=`date +%s`
 TS_DIFF=`echo $TS_END $TS_START | awk '{print $1 - $2}'`
