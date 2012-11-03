@@ -11,4 +11,5 @@
 /bin/utils/luapp
 /lib
 /nbproject/private
+*.ignore
 

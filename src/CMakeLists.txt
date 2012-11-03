@@ -1,11 +1,13 @@
+ cmake_policy(SET CMP0012 NEW)
 add_subdirectory(geoip)
 add_subdirectory(enet)
 
-set(USE_LUAJIT false)
+set(USE_LUAJIT true)
 
 if(${USE_LUAJIT})
-	add_subdirectory(luajit)
+	#add_subdirectory(luajit)
 	add_definitions(-DLUAJIT)
+	include(FindLUAJIT.cmake)
 else(${USE_LUAJIT})
 	add_subdirectory(lua)
 endif(${USE_LUAJIT})
@@ -20,9 +22,8 @@ else(NOT IS_DIRECTORY /usr/include/boost)
     set(BOOST_INCLUDE_DIRS /usr/include/boost)
 endif(NOT IS_DIRECTORY /usr/include/boost)
 add_subdirectory(fungu)
-add_subdirectory(lsqlite3-7)
 add_subdirectory(hopmod/standalone/luapp)
-add_subdirectory(luasql EXCLUDE_FROM_ALL)
+add_subdirectory(socket)
 
 include(CheckLibraryExists)
 
@@ -57,7 +58,7 @@ include_directories(
     ${FUNGU_INCLUDE_DIRS}
     ${OPENSSL_INCLUDE_DIR})
 
-add_definitions(-Wall -fsigned-char -DSTANDALONE -DREVISION=$ENV{REVISION} ${LSQLITE3_DEFINITIONS})
+add_definitions(-Wall -fsigned-char -DSTANDALONE -DREVISION=$ENV{REVISION})
 
 set(SAUERTOOLS_SOURCES
     shared/tools.cpp
@@ -111,8 +112,8 @@ target_link_libraries(lua_modules
     ${LUA_LIBRARY}
     ${FUNGU_STRING_LIBRARY}
     ${FUNGU_HTTP_LIBRARY}
-    ${LSQLITE3_LIBRARY}
-    ${OPENSSL_LIBRARIES})
+    ${OPENSSL_LIBRARIES}
+    ${LUA_SOCKET_LIBRARY})
 
 SET(GAME_SERVER_SOURCES
     engine/server.cpp

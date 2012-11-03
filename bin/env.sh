@@ -1,7 +1,7 @@
 #!/bin/sh
 
 export PATH="${PATH}:."
-export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:bin:lib:/usr/local/mysql/lib"
+export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:bin:bin/lib:/usr/local/mysql/lib"
 
 
 #export LUA_PATH="${LUA_PATH};script/package/?.lua"

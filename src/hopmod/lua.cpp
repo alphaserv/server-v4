@@ -103,7 +103,7 @@ static void load_lua_modules()
     lua::module::open_filesystem(L);
     lua::module::open_http_server(L);
     lua_packlibopen(L);
-#ifdef HAS_LSQLITE3
+#if defined(HAS_LSQLITE3) && !defined(DISABLE_LSQLITE)
     luaopen_lsqlite3(L);
     lua_pop(L, 1);
 #endif

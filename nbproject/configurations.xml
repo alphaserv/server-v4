@@ -3,18 +3,16 @@
   <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
     <df name="graphox-server" root=".">
       <df name="bin">
+        <df name="lib">
+        </df>
         <df name="utils">
         </df>
       </df>
-      <df name="CMakeModules">
-      </df>
       <df name="conf">
       </df>
-      <df name="lib">
-      </df>
-      <df name="log">
-      </df>
-      <df name="mapinfo">
+      <df name="instance">
+        <df name="1">
+        </df>
       </df>
       <df name="release_build">
         <df name="CMakeFiles">
@@ -32,6 +30,8 @@
           </df>
           <df name="CompilerIdCXX">
             <in>CMakeCXXCompilerId.cpp</in>
+          </df>
+          <df name="Progress">
           </df>
         </df>
         <df name="src">
@@ -251,32 +251,6 @@
               </df>
             </df>
           </df>
-          <df name="luajit">
-            <df name="CMakeFiles">
-              <df name="LUAJIT.dir">
-                <df name="LuaJIT-1.1.5">
-                  <df name="src">
-                  </df>
-                </df>
-              </df>
-              <df name="LUAJIT.dir">
-                <df name="LuaJIT-1.1.5">
-                  <df name="src">
-                  </df>
-                </df>
-              </df>
-            </df>
-          </df>
-          <df name="luajit">
-            <df name="CMakeFiles">
-              <df name="LUAJIT.dir">
-                <df name="LuaJIT-1.1.5">
-                  <df name="src">
-                  </df>
-                </df>
-              </df>
-            </df>
-          </df>
           <df name="luasql">
             <df name="CMakeFiles">
               <df name="luasql_mysql.dir">
@@ -293,6 +267,16 @@
             <df name="CMakeFiles">
               <df name="luasql_mysql.dir">
                 <df name="src">
+                </df>
+              </df>
+            </df>
+          </df>
+          <df name="socket">
+            <df name="CMakeFiles">
+            </df>
+            <df name="src">
+              <df name="CMakeFiles">
+                <df name="socket.dir">
                 </df>
               </df>
             </df>
@@ -576,6 +560,136 @@
         </df>
       </df>
       <df name="script">
+        <df name="as">
+          <df name="core">
+            <df name="auth">
+            </df>
+          </df>
+          <df name="packages">
+            <df name="acl_L">
+            </df>
+            <df name="admin_command_L">
+            </df>
+            <df name="as_master_auth_0.1">
+            </df>
+            <df name="as_master_auth_L">
+            </df>
+            <df name="as_master_client_0.1">
+            </df>
+            <df name="as_master_client_L">
+            </df>
+            <df name="auth_L">
+            </df>
+            <df name="authkey_L.ignore">
+            </df>
+            <df name="ban_L">
+            </df>
+            <df name="banners_L">
+            </df>
+            <df name="cd_L">
+            </df>
+            <df name="chucknorris_command_L">
+            </df>
+            <df name="chucknorris_L">
+            </df>
+            <df name="command_L">
+            </df>
+            <df name="connect_L">
+            </df>
+            <df name="cubescript_L">
+            </df>
+            <df name="cw_command_L">
+            </df>
+            <df name="database_L">
+            </df>
+            <df name="db_acl_L">
+            </df>
+            <df name="db_preferences_L">
+            </df>
+            <df name="db_vars_L">
+            </df>
+            <df name="dbauth_L">
+            </df>
+            <df name="demo_record_L">
+            </df>
+            <df name="dependic">
+            </df>
+            <df name="edit_L">
+            </df>
+            <df name="example">
+            </df>
+            <df name="extinfo_bot_L">
+            </df>
+            <df name="flagrun_L">
+            </df>
+            <df name="geoip_L">
+            </df>
+            <df name="irc_L">
+            </df>
+            <df name="logging_L">
+            </df>
+            <df name="mapbattle_L">
+            </df>
+            <df name="maprotation_L">
+            </df>
+            <df name="master_client_L">
+            </df>
+            <df name="master_command_L">
+            </df>
+            <df name="master_server_0.1">
+            </df>
+            <df name="master_server_L">
+            </df>
+            <df name="messages_L">
+              <df name="themes">
+              </df>
+            </df>
+            <df name="pause_cmd_L">
+            </df>
+            <df name="pause_msg_L">
+            </df>
+            <df name="players_L">
+            </df>
+            <df name="playervars_L">
+            </df>
+            <df name="preferences_command_L">
+            </df>
+            <df name="preferences_L">
+            </df>
+            <df name="punish_command_L">
+            </df>
+            <df name="punish_L">
+            </df>
+            <df name="quote_command_L">
+            </df>
+            <df name="quotes_L">
+            </df>
+            <df name="serverexec_L">
+            </df>
+            <df name="simpleauth_L">
+            </df>
+            <df name="spec_control_L">
+            </df>
+            <df name="spy_command_L">
+            </df>
+            <df name="stats_command_L">
+            </df>
+            <df name="stats_L">
+            </df>
+            <df name="time_command_L">
+            </df>
+            <df name="uptime_command_L">
+            </df>
+            <df name="veto_L">
+            </df>
+            <df name="warning_command_L">
+            </df>
+            <df name="who_command_L">
+            </df>
+          </df>
+          <df name="utils">
+          </df>
+        </df>
         <df name="base">
           <df name="auth">
             <df name="server">
@@ -614,6 +728,32 @@
           <df name="master">
           </df>
         </df>
+        <df name="console">
+        </df>
+        <df name="luarocks">
+          <df name="src">
+            <df name="bin">
+            </df>
+            <df name="luarocks">
+              <df name="build">
+              </df>
+              <df name="fetch">
+              </df>
+              <df name="fs">
+                <df name="unix">
+                </df>
+                <df name="win32">
+                </df>
+              </df>
+              <df name="tools">
+              </df>
+            </df>
+          </df>
+          <df name="test">
+          </df>
+        </df>
+        <df name="master">
+        </df>
         <df name="module">
           <df name="auth">
           </df>
@@ -647,13 +787,59 @@
         <df name="package">
           <df name="http">
           </df>
+          <df name="neo4j">
+          </df>
+          <df name="socket">
+          </df>
+          <df name="std">
+          </df>
+          <df name="utils">
+          </df>
         </df>
         <df name="plugin">
           <df name="DemoPlugin">
           </df>
         </df>
+        <df name="script">
+          <df name="module">
+            <df name="_irc">
+            </df>
+            <df name="auth">
+            </df>
+            <df name="balance">
+              <df name="server_size">
+              </df>
+              <df name="teams">
+              </df>
+            </df>
+            <df name="declare">
+            </df>
+            <df name="detect">
+              <df name="cheat">
+              </df>
+            </df>
+            <df name="display">
+            </df>
+            <df name="gamemode">
+            </df>
+            <df name="limit">
+            </df>
+            <df name="nlmod">
+            </df>
+            <df name="nlservices">
+            </df>
+            <df name="override">
+              <df name="admin">
+              </df>
+            </df>
+            <df name="stats">
+            </df>
+          </df>
+        </df>
       </df>
       <df name="share">
+        <df name="mapinfo">
+        </df>
       </df>
       <df name="src">
         <df name="boost">
@@ -3181,6 +3367,10 @@
             </df>
           </df>
         </df>
+        <df name="build">
+          <df name="CMakeModules">
+          </df>
+        </df>
         <df name="enet">
           <df name="docs">
           </df>
@@ -3403,13 +3593,6 @@
         <df name="include">
           <in>zconf.h</in>
           <in>zlib.h</in>
-        </df>
-        <df name="lsqlite3-7">
-          <df name="doc">
-          </df>
-          <df name="examples">
-          </df>
-          <in>lsqlite3.c</in>
         </df>
         <df name="lua">
           <df name="etc">
@@ -3655,13 +3838,6 @@
             </df>
           </df>
         </df>
-        <df name="luasql">
-          <df name="src">
-            <in>ls_mysql.c</in>
-            <in>luasql.c</in>
-            <in>luasql.h</in>
-          </df>
-        </df>
         <df name="shared">
           <in>command.h</in>
           <in>crypto.cpp</in>
@@ -3678,6 +3854,53 @@
           <in>tools.cpp</in>
           <in>tools.h</in>
           <in>zip.cpp</in>
+        </df>
+        <df name="socket">
+          <df name="doc">
+          </df>
+          <df name="etc">
+          </df>
+          <df name="lua">
+            <df name="socket">
+            </df>
+          </df>
+          <df name="samples">
+          </df>
+          <df name="src">
+            <in>auxiliar.c</in>
+            <in>auxiliar.h</in>
+            <in>buffer.c</in>
+            <in>buffer.h</in>
+            <in>except.c</in>
+            <in>except.h</in>
+            <in>inet.c</in>
+            <in>inet.h</in>
+            <in>io.c</in>
+            <in>io.h</in>
+            <in>luasocket.c</in>
+            <in>luasocket.h</in>
+            <in>mime.c</in>
+            <in>mime.h</in>
+            <in>options.c</in>
+            <in>options.h</in>
+            <in>select.c</in>
+            <in>select.h</in>
+            <in>socket.h</in>
+            <in>tcp.c</in>
+            <in>tcp.h</in>
+            <in>timeout.c</in>
+            <in>timeout.h</in>
+            <in>udp.c</in>
+            <in>udp.h</in>
+            <in>unix.c</in>
+            <in>unix.h</in>
+            <in>usocket.c</in>
+            <in>usocket.h</in>
+            <in>wsocket.c</in>
+            <in>wsocket.h</in>
+          </df>
+          <df name="test">
+          </df>
         </df>
       </df>
     </df>
@@ -3954,14 +4177,6 @@
             <Elem>NO_EVENTS=1</Elem>
           </preprocessorList>
         </ccTool>
-      </folder>
-      <folder path="graphox-server/src/lsqlite3-7">
-        <cTool>
-          <incDir>
-            <pElem>src/lsqlite3-7</pElem>
-            <pElem>src/luajit/LuaJIT-1.1.8/src</pElem>
-          </incDir>
-        </cTool>
       </folder>
       <folder path="graphox-server/src/luajit">
         <cTool>
@@ -14703,10 +14918,6 @@
           </preprocessorList>
         </ccTool>
       </item>
-      <item path="src/lsqlite3-7/lsqlite3.c" ex="false" tool="0" flavor2="2">
-        <cTool>
-        </cTool>
-      </item>
       <item path="src/lua/etc/all.c" ex="true" tool="0" flavor2="0">
       </item>
       <item path="src/lua/etc/lua.hpp" ex="true" tool="3" flavor2="0">
@@ -15065,12 +15276,6 @@
       </item>
       <item path="src/luajit/LuaJIT-1.1.8/src/print.c" ex="true" tool="0" flavor2="0">
       </item>
-      <item path="src/luasql/src/ls_mysql.c" ex="true" tool="0" flavor2="0">
-      </item>
-      <item path="src/luasql/src/luasql.c" ex="true" tool="0" flavor2="0">
-      </item>
-      <item path="src/luasql/src/luasql.h" ex="true" tool="3" flavor2="0">
-      </item>
       <item path="src/shared/crypto.cpp" ex="false" tool="1" flavor2="4">
         <ccTool>
         </ccTool>
@@ -15386,14 +15591,6 @@
             <Elem>NO_EVENTS</Elem>
           </preprocessorList>
         </ccTool>
-      </folder>
-      <folder path="graphox-server/src/lsqlite3-7">
-        <cTool>
-          <incDir>
-            <pElem>src/lua/src</pElem>
-            <pElem>release_build/src/lsqlite3-7</pElem>
-          </incDir>
-        </cTool>
       </folder>
       <folder path="graphox-server/src/lua">
         <cTool>
@@ -26054,10 +26251,6 @@
           </preprocessorList>
         </ccTool>
       </item>
-      <item path="src/lsqlite3-7/lsqlite3.c" ex="false" tool="0" flavor2="2">
-        <cTool>
-        </cTool>
-      </item>
       <item path="src/lua/etc/all.c" ex="true" tool="0" flavor2="0">
       </item>
       <item path="src/lua/etc/lua.hpp" ex="true" tool="3" flavor2="0">
@@ -26589,12 +26782,6 @@
             flavor2="2">
         <cTool>
         </cTool>
-      </item>
-      <item path="src/luasql/src/ls_mysql.c" ex="true" tool="0" flavor2="0">
-      </item>
-      <item path="src/luasql/src/luasql.c" ex="true" tool="0" flavor2="0">
-      </item>
-      <item path="src/luasql/src/luasql.h" ex="true" tool="3" flavor2="0">
       </item>
       <item path="src/shared/crypto.cpp" ex="false" tool="1" flavor2="4">
         <ccTool>

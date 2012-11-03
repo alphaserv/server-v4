@@ -15,6 +15,28 @@
 
 module("table", package.seeall)
 
+function pack(...)
+	return {...}
+end
+
+function pull(tab)
+	for i, v in pairs(tab) do
+		table.remove(tab, i)
+		return v
+	end
+end
+
+function reverse(table)
+	local size = #table
+	local reversed = {}
+	 
+	for i,v in ipairs ( table ) do
+	    reversed[size-i] = v
+	end
+	
+	return reversed
+end
+
 --[[!
 	Function: isList
 	Checks if this is a list with keys
@@ -80,7 +102,7 @@ print_r = function(t, i)
 				)
 			)
 			
-				print_r(v, i+2)
+			print_r(v, i+2)
 	
 			print (
 				addTabs("},", i+1)
@@ -110,33 +132,6 @@ print_r = function(t, i)
 end
 
 --[[!
-	Function: mergeRecursive
-	Recursively merges an array and merges lists found
-	
-	Parameters
-		table1 - the base table to override
-		table2 - the table to merge with table1
-	
-	Return:
-		table - the newly merged table
-]]	
-mergeRecursive = function(array1, array2, recursive)
-	for name, value in pairs(array2) do
-		if type(array1[name]) == "table" and type(value) == "table" then
-			if isList(array1) and isList(array2) then
-				array1[name] = mergeList(array1[name], value)
-			else
-				array1[name] = merge(array1[name], value, true)
-			end
-		else
-			array1[name]  = value
-		end
-	end		
-
-	return array1
-end
-
---[[!
 	Function: merge
 	merges an array
 	
@@ -151,6 +146,7 @@ merge = function(t1, t2)
 	for k,v in pairs(t2) do t1[k] = v end
 	return t1
 end
+local _merge = merge
 
 --[[!
 	Function: mergeList
@@ -182,7 +178,34 @@ mergeList = function(array1, array2)
 		
 	return list
 end
+local _mergeList = mergelist
 
+--[[!
+	Function: mergeRecursive
+	Recursively merges an array and merges lists found
+	
+	Parameters
+		table1 - the base table to override
+		table2 - the table to merge with table1
+	
+	Return:
+		table - the newly merged table
+]]	
+mergeRecursive = function(array1, array2, recursive)
+	for name, value in pairs(array2) do
+		if type(array1[name]) == "table" and type(value) == "table" then
+			if isList(array1) and isList(array2) then
+				array1[name] = _mergeList(array1[name], value)
+			else
+				array1[name] = _merge(array1[name], value, true)
+			end
+		else
+			array1[name]  = value
+		end
+	end		
+
+	return array1
+end
 
 function simpleCopy(t)
 	local u = {}

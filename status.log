@@ -1,0 +1,8 @@
+Starting the server ...
+Starting server on port: 20000
+Starting server on port: 20000
+Game server socket listening on UDP 0.0.0.0:20000
+Game info socket listening on UDP 0.0.0.0:20001
+dedicated server started, waiting for clients...
+*READY*
+

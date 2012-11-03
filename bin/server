@@ -28,11 +28,7 @@ fi
 
 cd $d_main
 
-if [ ! -d bin ] || [ ! -d log ] || [ ! -d conf ] || [ ! -d script ]
-then
-    echo "Incomplete Installation! bin/, log/, conf/ or script/ are missing."
-    exit 1
-fi
+export AS_HOME_DIR="$d_main"
 
 ################################################################################
 
@@ -57,7 +53,6 @@ p_exec() {
 ################################################################################
 
 p_start_server() {
-
     if [ -p serverexec ]
     then
 	return 1
@@ -67,25 +62,25 @@ p_start_server() {
     ulimit -c unlimited
     
     # cleanup and intialization
-    rm -f log/status.log
-    touch log/status.log
-    touch log/error.log
+    rm -f status.log
+    touch status.log
+    touch error.log
     
     ERROR_START=
     if echo $v_system | grep -q "BSD"
     then
-	ERROR_START=$(stat -f %Sp log/error.log)
+	ERROR_START=$(stat -f %Sp error.log)
     else
-	ERROR_START=$(stat -c %s log/error.log)
+	ERROR_START=$(stat -c %s error.log)
     fi
     
     ERROR_START=$(( $ERROR_START + 1 ))
     
     # start the game server as a background process
-    nohup bin/monitor bin/sauer_server ${SERVER_OPTIONS} 1>log/status.log 2>>log/error.log </dev/null &
+    nohup bin/monitor bin/sauer_server ${SERVER_OPTIONS} 1>status.log 2>>error.log </dev/null &
     
     # wait for server to start up and print the initial status messages
-    until $(cat log/status.log | grep -q *READY*)
+    until $(cat status.log | grep -q *READY*)
     do
         #stop if server has terminated
         jobs %- > /dev/null 2>&1
@@ -96,12 +91,12 @@ p_start_server() {
         fi
     done
     
-    tail -c +$ERROR_START log/error.log
-    cat log/status.log
+    tail -c +$ERROR_START error.log
+    cat status.log
     
     if [ "$v_remove_status_log" = "y" ]
     then
-        rm log/status.log
+        rm status.log
     fi
     
     return 0
@@ -167,150 +162,209 @@ p_password() {
 
 ################################################################################
 
-p_open_shell() {
-
-    if [ ! -p serverexec ]
-    then
-        return 1
-    fi
-    
-    msg="Press CTRL+C to quit."
-    
-    case "$1" in
-	'ruby')
-	    echo $msg
-	    exec bin/utils/shell.rb
-	;;
-	'perl')
-	    echo $msg
-	    exec bin/utils/shell.pl
-	;;
-	*)
-	    if [ ! -e bin/utils/shell ]
-	    then
-		return 2
-	    else
-		exec bin/utils/shell
-	    fi
-	;;
-    esac
-    
-    return 0
-}
-
 p_luapp() {
 
     exec bin/utils/luapp "$*"
 }
 
+p_new_instance() {
+	p_luapp "script/console/newInstance.lua"
+}
+
+p_shell() {
+	p_luapp "script/console/shell.lua"
+}
+
+
 ################################################################################
 
 p_msg_no_server() {
-
     echo "Server is not active."
     exit 0
 }
 
 ################################################################################
 
-case "$1" in
-    'start')
-	case "$2" in
-	    'luapp')
-		if [ "x$3" = "x" ]
+p_compile() {
+	export REVISION=`git log | grep 'commit ' -m 1 | awk '{print $2}'`
+
+	if [ ! `git status | grep 'working directory clean' -m 1 | awk '{print $2}'` ]; then
+		export REVISION="$REVISION-custom"
+		echo "$REVISION";
+	fi
+
+	THREADS=1
+	MODNAME="Alphaserv"
+
+	if [ `uname -s` = "Linux" -a -d "/proc" ]; then
+		THREADS=`cat /proc/cpuinfo | grep processor | wc -l`
+	fi
+
+	ARG_LENGTH=$# 
+	STRCOMPILE="Compiling"
+	COMPILEDIR="release_build"
+	COMPILEFLAGS=""
+	BUILDTYPE="release"
+
+	while getopts “drct:” OPTION
+	do
+		 case $OPTION in
+		     d)
+				 COMPILEDIR="debug_build"
+				 COMPILEFLAGS="-D CMAKE_BUILD_TYPE=DEBUG"
+				 BUILDTYPE="debug"
+		         ;;
+		     r)
+				STRCOMPILE="Recompiling"
+				rm -rf $COMPILEDIR
+		         ;;
+		     c)
+		     	rm -rf "release_build"
+		     	rm -rf "debug_build"
+		     	;;
+		     t)
+		     	THREADS=$OPTARG
+		     	;;
+		 esac
+	done
+
+	mkdir $COMPILEDIR
+	cd $COMPILEDIR
+
+	cmake $COMPILEFLAGS .. >> /dev/null
+	STRTHREADS="threads"
+
+	if [ $THREADS = 1 ]; then
+	  STRTHREADS="thread"
+	fi
+
+	echo "$STRCOMPILE $MODNAME commit $REVISION using $THREADS $STRTHREADS ($BUILDTYPE build)\n"
+
+	TS_START=`date +%s`
+
+	set -e #fail on error
+	make -j$THREADS
+	make install >> /dev/null
+
+	TS_END=`date +%s`
+	TS_DIFF=`echo $TS_END $TS_START | awk '{print $1 - $2}'`
+
+	echo "
+	Took $TS_DIFF Seconds"
+	cd ..
+}
+
+################################################################################
+
+if [ ! -e bin/sauer_server ]
+then
+	if [ "$1" = "start" ] || [ "x$1" = "x" ] || [ "$1" = "stop" ]; then
+		echo "Please run bin/server compile first."
+		exit 2
+	fi
+fi
+
+a=$1
+if [ "x$1" = "x-?" ] || [ "x$1" = "x?" ] || [ "x$1" = "x--help" ]
+then
+a="help"
+fi
+
+if [ "x$1" = "x" ]
+then
+a="start"
+fi
+
+case "$a" in
+	'shell')
+		p_shell
+		;;
+
+	'luapp')
+		if [ "x$2" = "x" ]
 		then
-		    echo "No file given."
-		    echo "usage: $0 start luapp luafile"
-		    exit 2
+			echo "No file given."
+			echo "usage: $0 start luapp luafile"
+			exit 2
 		fi
 		
-		shift 2
+		shift 1
 		p_luapp "$*"
-	    ;;
-	    'shell')
-		ret_val=$(p_open_shell "$3" ; echo $?)
-		if [ ! "$ret_val" = "0" ]
-		then
-		    case "$ret_val" in
-			'1')
-		    	    p_msg_no_server
-			;;
-			'2')
-		    	    echo "You must specify a shell: ruby or perl."
-		    	    exit 2
-			;;
-			*)
-		    	    echo "Unexpected error."
-		    	    exit 3
-			;;
-		    esac
-		fi
-	    ;;
-	    *)
-		if [ "x$2" = "x--no-statuslog" ]
-                then
-                    v_remove_status_log=y
-                fi
-        
-        if [ ! -x bin/sauer_server ]
-        then
-            echo "Cannot find or execute bin/sauer_server"
-            exit 1
-        fi
-        
-        if [ ! -x bin/monitor ]
-        then
-            echo "Cannot find or execute bin/monitor"
-            exit 1
-        fi
-        
-		if ! p_start_server
-		then
-		    echo "It appears the game server is already running."
-		fi
-	    ;;
-	esac
-    ;;
+		;;
+	'master')
+		p_luapp "script/master/init.lua"
+	;;
+    
     'restart')
-	p_restart_server
-    ;;
+		p_restart_server
+		;;
+
     'stop')
         p_stop_server
-    ;;
+	    ;;
+
     'status')
-	if ! p_status "$2"
-	then
-	    p_msg_no_server
-	fi
-    ;;
-    'updateconf')
-        if ! p_update_conf
-	then
-	    p_msg_no_server
-	fi
-    ;;
-    'password')
-        if ! p_password "$2"
-	then
-	    p_msg_no_server
-	fi
-    ;;
+		if ! p_status "$2"
+		then
+			p_msg_no_server
+		fi
+		;;
+
     'help')
-	echo "usage: $0 [start] [--no-statuslog]"
-	echo "       $0 [start] luapp luafile"
-	echo "       $0 [start] shell [ruby|perl]"
-	echo ""
-	echo "       $0 stop"
-	echo ""
-	echo "       $0 restart"
-	echo ""
-	echo "       $0 status [output file]"
-	echo "       $0 updateconf"
-	echo "       $0 password 'new password'"
-    ;;
+    	if [ "x$2" = "x--wrong-usage" ]; then
+    		echo "Invalid option \"${3}\":"
+    	else
+			echo "usage:"
+		fi
+		echo "       $0 [start] [--no-statuslog]"
+		echo "       $0 stop"
+		echo "       $0 restart"
+		echo "       $0 status [output file]"
+		echo "       $0 luapp luafile"
+		echo ""
+		echo "       $0 compile [-drct]"
+		echo ""
+		echo "       $0 shell"
+		echo ""
+		;;
+
+    'compile')
+    	shift 2
+    	p_compile "$*"
+	    ;;
+    
+    'start')
+		if [ "x$2" = "x--no-statuslog" ]
+		then
+			v_remove_status_log=y
+		fi
+		
+		if [ ! -x bin/sauer_server ]
+		then
+		    echo "Cannot find or execute bin/sauer_server"
+		    exit 1
+		fi
+				
+		if [ ! -x bin/monitor ]
+		then
+		    echo "Cannot find or execute bin/monitor"
+		    exit 1
+		fi
+				
+		if ! p_start_server
+		then
+			echo "It appears the game server is already running."
+		fi
+		
+    	;;
+    'rawstart')
+    	echo "trying to start ..."
+    	exec bin/sauer_server
+    	;;
     *)
-        exec $d_main/bin/$f_starter start $*
-    ;;
+    	#recursive wrong usage
+    	exec "$0" "help" "--wrong-usage" "$1"
+    	;;
 esac
 
 exit 0

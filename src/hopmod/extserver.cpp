@@ -1640,17 +1640,18 @@ void send_fake_rename(int cn, int ocn, const char * newname)
 //int cn, int chan, const char *format, ...
 int lua_sendf(lua_State *L)
 {
-		if(argc < 3)
+	int argc = lua_gettop(L);
+	if(argc < 3)
 	{
 		luaL_error(L, "Not enough arguments.");
-		return;
+		return 0;
 	}
 	
 	argc -= 3;
 	
 	int cn = luaL_checknumber(L, 1);
 	int chan = luaL_checknumber(L, 1);
-	const char *format = luaL_checknumber(L, 1);
+	const char *format = luaL_checkstring(L, 1);
 	
 	int exclude = -1;
 	bool reliable = false;
@@ -1665,35 +1666,40 @@ int lua_sendf(lua_State *L)
 
 		case 'v':
 		{
-			int n = va_arg(args, int);
-			int *v = va_arg(args, int *);
-			loopi(n) putint(p, v[i]);
-			break;
+			luaL_error(L, "non implemented option v");
+			return 0;
+			//int n = va_arg(args, int);
+			//int *v = va_arg(args, int *);
+			//loopi(n) putint(p, v[i]);
+			//break;
 		}
 
 		case 'i': 
 		{
 			int n = isdigit(*format) ? *format++-'0' : 1;
-			loopi(n) putint(p, va_arg(args, int));
+			loopi(n) putint(p, luaL_checknumber(L, 1));
 			break;
 		}
 		case 'f':
 		{
 			int n = isdigit(*format) ? *format++-'0' : 1;
-			loopi(n) putfloat(p, (float)va_arg(args, double));
+			loopi(n) putfloat(p, (float)luaL_checknumber(L, 1));
 			break;
 		}
-		case 's': sendstring(va_arg(args, const char *), p); break;
+		case 's': sendstring(luaL_checkstring(L, 1), p); break;
 		case 'm':
 		{
-			int n = va_arg(args, int);
-			p.put(va_arg(args, uchar *), n);
-			break;
+			luaL_error(L, "non implemented option m");
+			//int n = va_arg(args, int);
+			//p.put(va_arg(args, uchar *), n);
+			//break;
 		}
 	}
-	va_end(args);
+	
 	ENetPacket *packet = p.finalize();
 	sendpacket(cn, chan, packet, exclude);
-	return packet->referenceCount > 0 ? packet : NULL;
+	
+	//packet->referenceCount > 0 ? packet : NULL;
+	return 0;
 }
 #endif
