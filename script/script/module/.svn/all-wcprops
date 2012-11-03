@@ -1,0 +1,53 @@
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/projects/ictf/!svn/ver/1352/branches/stable/script/module
+END
+mumble.lua
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/projects/ictf/!svn/ver/5/branches/stable/script/module/mumble.lua
+END
+mute_spectators.lua
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/projects/ictf/!svn/ver/5/branches/stable/script/module/mute_spectators.lua
+END
+name_bans.lua
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/projects/ictf/!svn/ver/5/branches/stable/script/module/name_bans.lua
+END
+proxy_bans.lua
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/projects/ictf/!svn/ver/5/branches/stable/script/module/proxy_bans.lua
+END
+name_lock.lua
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/projects/ictf/!svn/ver/5/branches/stable/script/module/name_lock.lua
+END
+nlmod.zip
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/projects/ictf/!svn/ver/5/branches/stable/script/module/nlmod.zip
+END
+recordgames.lua
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/projects/ictf/!svn/ver/5/branches/stable/script/module/recordgames.lua
+END
+stats.lua
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/projects/ictf/!svn/ver/5/branches/stable/script/module/stats.lua
+END

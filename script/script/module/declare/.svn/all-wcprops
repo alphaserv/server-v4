@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/projects/ictf/!svn/ver/5/branches/stable/script/module/declare
+END
+ircbot.vars
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/projects/ictf/!svn/ver/5/branches/stable/script/module/declare/ircbot.vars
+END
+cmd.vars
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/projects/ictf/!svn/ver/5/branches/stable/script/module/declare/cmd.vars
+END
+mod.vars
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/projects/ictf/!svn/ver/5/branches/stable/script/module/declare/mod.vars
+END

@@ -1,0 +1,17 @@
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/projects/ictf/!svn/ver/5/branches/stable/script/module/_irc
+END
+lua_bot.lua
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/projects/ictf/!svn/ver/5/branches/stable/script/module/_irc/lua_bot.lua
+END
+python_bot.lua
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/projects/ictf/!svn/ver/5/branches/stable/script/module/_irc/python_bot.lua
+END

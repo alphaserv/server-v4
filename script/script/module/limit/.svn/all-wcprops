@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/projects/ictf/!svn/ver/5/branches/stable/script/module/limit
+END
+ping.lua
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/projects/ictf/!svn/ver/5/branches/stable/script/module/limit/ping.lua
+END
+spectating.lua
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/projects/ictf/!svn/ver/5/branches/stable/script/module/limit/spectating.lua
+END
+inactivity.lua
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/projects/ictf/!svn/ver/5/branches/stable/script/module/limit/inactivity.lua
+END

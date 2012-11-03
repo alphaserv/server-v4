@@ -1,0 +1,65 @@
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/projects/ictf/!svn/ver/5/branches/stable/script/module/stats
+END
+playercmd.lua
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/projects/ictf/!svn/ver/5/branches/stable/script/module/stats/playercmd.lua
+END
+init.lua
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/projects/ictf/!svn/ver/5/branches/stable/script/module/stats/init.lua
+END
+mysql_schema.sql
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/projects/ictf/!svn/ver/5/branches/stable/script/module/stats/mysql_schema.sql
+END
+sqlite3.lua
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/projects/ictf/!svn/ver/5/branches/stable/script/module/stats/sqlite3.lua
+END
+mysql.lua
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/projects/ictf/!svn/ver/5/branches/stable/script/module/stats/mysql.lua
+END
+test_backend.lua
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/projects/ictf/!svn/ver/5/branches/stable/script/module/stats/test_backend.lua
+END
+core.lua
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/projects/ictf/!svn/ver/5/branches/stable/script/module/stats/core.lua
+END
+json.lua
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/projects/ictf/!svn/ver/5/branches/stable/script/module/stats/json.lua
+END
+mysql_triggers.sql
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/projects/ictf/!svn/ver/5/branches/stable/script/module/stats/mysql_triggers.sql
+END
+schema.sql
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/projects/ictf/!svn/ver/5/branches/stable/script/module/stats/schema.sql
+END

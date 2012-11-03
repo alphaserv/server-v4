@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/projects/ictf/!svn/ver/5/branches/stable/script/module/balance/server_size
+END
+by_gamemode.lua
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/projects/ictf/!svn/ver/5/branches/stable/script/module/balance/server_size/by_gamemode.lua
+END
+by_gamemode_and_mastermode.lua
+K 25
+svn:wc:ra_dav:version-url
+V 106
+/projects/ictf/!svn/ver/5/branches/stable/script/module/balance/server_size/by_gamemode_and_mastermode.lua
+END
+by_mastermode.lua
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/projects/ictf/!svn/ver/5/branches/stable/script/module/balance/server_size/by_mastermode.lua
+END
+by_spec_count.lua
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/projects/ictf/!svn/ver/5/branches/stable/script/module/balance/server_size/by_spec_count.lua
+END
